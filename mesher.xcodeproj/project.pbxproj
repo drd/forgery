@@ -7,6 +7,30 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5275BE9221D6C91200BA2C81 /* MeshParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5275BE9121D6C91200BA2C81 /* MeshParser.swift */; };
+		5275BE9321D6C91700BA2C81 /* MeshParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5275BE9121D6C91200BA2C81 /* MeshParser.swift */; };
+		5275BE9421D6C91700BA2C81 /* MeshParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5275BE9121D6C91200BA2C81 /* MeshParser.swift */; };
+		5275BE9621D6CFE600BA2C81 /* Geometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5275BE9521D6CFE600BA2C81 /* Geometry.swift */; };
+		5275BE9721D6D00F00BA2C81 /* Geometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5275BE9521D6CFE600BA2C81 /* Geometry.swift */; };
+		5275BE9821D6D00F00BA2C81 /* Geometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5275BE9521D6CFE600BA2C81 /* Geometry.swift */; };
+		5275BE9B21D6D0BF00BA2C81 /* float4x4+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5275BE9A21D6D0BF00BA2C81 /* float4x4+Extensions.swift */; };
+		5275BE9C21D6D0BF00BA2C81 /* float4x4+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5275BE9A21D6D0BF00BA2C81 /* float4x4+Extensions.swift */; };
+		5275BE9D21D6D0BF00BA2C81 /* float4x4+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5275BE9A21D6D0BF00BA2C81 /* float4x4+Extensions.swift */; };
+		5275BE9F21D6D1C200BA2C81 /* Array+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5275BE9E21D6D1C200BA2C81 /* Array+Extensions.swift */; };
+		5275BEA021D6D1C200BA2C81 /* Array+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5275BE9E21D6D1C200BA2C81 /* Array+Extensions.swift */; };
+		5275BEA121D6D1C200BA2C81 /* Array+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5275BE9E21D6D1C200BA2C81 /* Array+Extensions.swift */; };
+		5275BEA321D6D1F200BA2C81 /* float4+Extensions copy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5275BEA221D6D1F200BA2C81 /* float4+Extensions copy.swift */; };
+		5275BEA421D6D1F200BA2C81 /* float4+Extensions copy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5275BEA221D6D1F200BA2C81 /* float4+Extensions copy.swift */; };
+		5275BEA521D6D1F200BA2C81 /* float4+Extensions copy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5275BEA221D6D1F200BA2C81 /* float4+Extensions copy.swift */; };
+		5275BEA721D6D21900BA2C81 /* float3+Extensions copy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5275BEA621D6D21900BA2C81 /* float3+Extensions copy.swift */; };
+		5275BEA821D6D21900BA2C81 /* float3+Extensions copy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5275BEA621D6D21900BA2C81 /* float3+Extensions copy.swift */; };
+		5275BEA921D6D21900BA2C81 /* float3+Extensions copy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5275BEA621D6D21900BA2C81 /* float3+Extensions copy.swift */; };
+		5275BEAB21D6D21B00BA2C81 /* Data+Extensions copy 2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5275BEAA21D6D21B00BA2C81 /* Data+Extensions copy 2.swift */; };
+		5275BEAC21D6D21B00BA2C81 /* Data+Extensions copy 2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5275BEAA21D6D21B00BA2C81 /* Data+Extensions copy 2.swift */; };
+		5275BEAD21D6D21B00BA2C81 /* Data+Extensions copy 2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5275BEAA21D6D21B00BA2C81 /* Data+Extensions copy 2.swift */; };
+		5275BEB221D6D2A700BA2C81 /* SceneConstructor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5275BEB121D6D2A700BA2C81 /* SceneConstructor.swift */; };
+		5275BEB321D6D2A700BA2C81 /* SceneConstructor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5275BEB121D6D2A700BA2C81 /* SceneConstructor.swift */; };
+		5275BEB421D6D2A700BA2C81 /* SceneConstructor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5275BEB121D6D2A700BA2C81 /* SceneConstructor.swift */; };
 		52C225B221D42F6800725E02 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C225B121D42F6800725E02 /* AppDelegate.swift */; };
 		52C225B421D42F6800725E02 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C225B321D42F6800725E02 /* GameViewController.swift */; };
 		52C225B721D42F6800725E02 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 52C225B521D42F6800725E02 /* Main.storyboard */; };
@@ -32,6 +56,14 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5275BE9121D6C91200BA2C81 /* MeshParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeshParser.swift; sourceTree = "<group>"; };
+		5275BE9521D6CFE600BA2C81 /* Geometry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Geometry.swift; sourceTree = "<group>"; };
+		5275BE9A21D6D0BF00BA2C81 /* float4x4+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "float4x4+Extensions.swift"; sourceTree = "<group>"; };
+		5275BE9E21D6D1C200BA2C81 /* Array+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+Extensions.swift"; sourceTree = "<group>"; };
+		5275BEA221D6D1F200BA2C81 /* float4+Extensions copy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "float4+Extensions copy.swift"; sourceTree = "<group>"; };
+		5275BEA621D6D21900BA2C81 /* float3+Extensions copy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "float3+Extensions copy.swift"; sourceTree = "<group>"; };
+		5275BEAA21D6D21B00BA2C81 /* Data+Extensions copy 2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+Extensions copy 2.swift"; sourceTree = "<group>"; };
+		5275BEB121D6D2A700BA2C81 /* SceneConstructor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneConstructor.swift; sourceTree = "<group>"; };
 		52C225A621D42F6500725E02 /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		52C225A721D42F6500725E02 /* Renderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Renderer.swift; sourceTree = "<group>"; };
 		52C225A821D42F6500725E02 /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
@@ -79,26 +111,74 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		52C225A021D42F6500725E02 = {
+		5275BE9921D6D0B000BA2C81 /* extensions */ = {
 			isa = PBXGroup;
 			children = (
-				52C225A521D42F6500725E02 /* mesher Shared */,
-				52C225B021D42F6800725E02 /* mesher iOS */,
-				52C225C121D42F6800725E02 /* mesher tvOS */,
-				52C225CF21D42F6800725E02 /* mesher macOS */,
-				52C225AF21D42F6800725E02 /* Products */,
+				5275BEAE21D6D27100BA2C81 /* Foundation */,
+				5275BEAF21D6D27C00BA2C81 /* simd */,
 			);
+			path = extensions;
 			sourceTree = "<group>";
 		};
-		52C225A521D42F6500725E02 /* mesher Shared */ = {
+		5275BEAE21D6D27100BA2C81 /* Foundation */ = {
+			isa = PBXGroup;
+			children = (
+				5275BE9E21D6D1C200BA2C81 /* Array+Extensions.swift */,
+				5275BEAA21D6D21B00BA2C81 /* Data+Extensions copy 2.swift */,
+			);
+			path = Foundation;
+			sourceTree = "<group>";
+		};
+		5275BEAF21D6D27C00BA2C81 /* simd */ = {
+			isa = PBXGroup;
+			children = (
+				5275BEA621D6D21900BA2C81 /* float3+Extensions copy.swift */,
+				5275BEA221D6D1F200BA2C81 /* float4+Extensions copy.swift */,
+				5275BE9A21D6D0BF00BA2C81 /* float4x4+Extensions.swift */,
+			);
+			path = simd;
+			sourceTree = "<group>";
+		};
+		5275BEB021D6D29E00BA2C81 /* import */ = {
+			isa = PBXGroup;
+			children = (
+				5275BEB121D6D2A700BA2C81 /* SceneConstructor.swift */,
+				5275BE9121D6C91200BA2C81 /* MeshParser.swift */,
+			);
+			path = import;
+			sourceTree = "<group>";
+		};
+		5275BEB521D6D2F500BA2C81 /* rendering */ = {
 			isa = PBXGroup;
 			children = (
 				52C225A621D42F6500725E02 /* Shaders.metal */,
 				52C225A721D42F6500725E02 /* Renderer.swift */,
 				52C225A821D42F6500725E02 /* ShaderTypes.h */,
+			);
+			path = rendering;
+			sourceTree = "<group>";
+		};
+		52C225A021D42F6500725E02 = {
+			isa = PBXGroup;
+			children = (
+				52C225A521D42F6500725E02 /* shared */,
+				52C225B021D42F6800725E02 /* iOS */,
+				52C225C121D42F6800725E02 /* tvOS */,
+				52C225CF21D42F6800725E02 /* macOS */,
+				52C225AF21D42F6800725E02 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		52C225A521D42F6500725E02 /* shared */ = {
+			isa = PBXGroup;
+			children = (
+				5275BE9521D6CFE600BA2C81 /* Geometry.swift */,
+				5275BEB521D6D2F500BA2C81 /* rendering */,
+				5275BEB021D6D29E00BA2C81 /* import */,
+				5275BE9921D6D0B000BA2C81 /* extensions */,
 				52C225A921D42F6800725E02 /* Assets.xcassets */,
 			);
-			path = "mesher Shared";
+			path = shared;
 			sourceTree = "<group>";
 		};
 		52C225AF21D42F6800725E02 /* Products */ = {
@@ -111,7 +191,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		52C225B021D42F6800725E02 /* mesher iOS */ = {
+		52C225B021D42F6800725E02 /* iOS */ = {
 			isa = PBXGroup;
 			children = (
 				52C225B121D42F6800725E02 /* AppDelegate.swift */,
@@ -120,10 +200,10 @@
 				52C225B821D42F6800725E02 /* LaunchScreen.storyboard */,
 				52C225BB21D42F6800725E02 /* Info.plist */,
 			);
-			path = "mesher iOS";
+			path = iOS;
 			sourceTree = "<group>";
 		};
-		52C225C121D42F6800725E02 /* mesher tvOS */ = {
+		52C225C121D42F6800725E02 /* tvOS */ = {
 			isa = PBXGroup;
 			children = (
 				52C225C221D42F6800725E02 /* AppDelegate.swift */,
@@ -131,10 +211,10 @@
 				52C225C621D42F6800725E02 /* Main.storyboard */,
 				52C225C921D42F6800725E02 /* Info.plist */,
 			);
-			path = "mesher tvOS";
+			path = tvOS;
 			sourceTree = "<group>";
 		};
-		52C225CF21D42F6800725E02 /* mesher macOS */ = {
+		52C225CF21D42F6800725E02 /* macOS */ = {
 			isa = PBXGroup;
 			children = (
 				52C225D021D42F6800725E02 /* AppDelegate.swift */,
@@ -142,7 +222,7 @@
 				52C225D421D42F6800725E02 /* Main.storyboard */,
 				52C225D721D42F6800725E02 /* Info.plist */,
 			);
-			path = "mesher macOS";
+			path = macOS;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -280,9 +360,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				52C225DB21D42F6800725E02 /* Renderer.swift in Sources */,
+				5275BE9621D6CFE600BA2C81 /* Geometry.swift in Sources */,
+				5275BEAC21D6D21B00BA2C81 /* Data+Extensions copy 2.swift in Sources */,
 				52C225D821D42F6800725E02 /* Shaders.metal in Sources */,
+				5275BE9B21D6D0BF00BA2C81 /* float4x4+Extensions.swift in Sources */,
+				5275BEB321D6D2A700BA2C81 /* SceneConstructor.swift in Sources */,
+				5275BE9221D6C91200BA2C81 /* MeshParser.swift in Sources */,
+				5275BEA021D6D1C200BA2C81 /* Array+Extensions.swift in Sources */,
+				5275BEA821D6D21900BA2C81 /* float3+Extensions copy.swift in Sources */,
 				52C225B421D42F6800725E02 /* GameViewController.swift in Sources */,
 				52C225B221D42F6800725E02 /* AppDelegate.swift in Sources */,
+				5275BEA421D6D1F200BA2C81 /* float4+Extensions copy.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -291,9 +379,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				52C225DC21D42F6800725E02 /* Renderer.swift in Sources */,
+				5275BE9721D6D00F00BA2C81 /* Geometry.swift in Sources */,
+				5275BEAD21D6D21B00BA2C81 /* Data+Extensions copy 2.swift in Sources */,
 				52C225D921D42F6800725E02 /* Shaders.metal in Sources */,
+				5275BE9C21D6D0BF00BA2C81 /* float4x4+Extensions.swift in Sources */,
+				5275BEB421D6D2A700BA2C81 /* SceneConstructor.swift in Sources */,
+				5275BE9321D6C91700BA2C81 /* MeshParser.swift in Sources */,
+				5275BEA121D6D1C200BA2C81 /* Array+Extensions.swift in Sources */,
+				5275BEA921D6D21900BA2C81 /* float3+Extensions copy.swift in Sources */,
 				52C225C521D42F6800725E02 /* GameViewController.swift in Sources */,
 				52C225C321D42F6800725E02 /* AppDelegate.swift in Sources */,
+				5275BEA521D6D1F200BA2C81 /* float4+Extensions copy.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -302,9 +398,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				52C225DD21D42F6800725E02 /* Renderer.swift in Sources */,
+				5275BE9821D6D00F00BA2C81 /* Geometry.swift in Sources */,
+				5275BEAB21D6D21B00BA2C81 /* Data+Extensions copy 2.swift in Sources */,
 				52C225DA21D42F6800725E02 /* Shaders.metal in Sources */,
+				5275BE9D21D6D0BF00BA2C81 /* float4x4+Extensions.swift in Sources */,
+				5275BEB221D6D2A700BA2C81 /* SceneConstructor.swift in Sources */,
+				5275BE9421D6C91700BA2C81 /* MeshParser.swift in Sources */,
+				5275BE9F21D6D1C200BA2C81 /* Array+Extensions.swift in Sources */,
+				5275BEA721D6D21900BA2C81 /* float3+Extensions copy.swift in Sources */,
 				52C225D321D42F6800725E02 /* GameViewController.swift in Sources */,
 				52C225D121D42F6800725E02 /* AppDelegate.swift in Sources */,
+				5275BEA321D6D1F200BA2C81 /* float4+Extensions copy.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -461,6 +565,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = Z62WTTQ8ST;
 				INFOPLIST_FILE = "mesher iOS/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -470,7 +575,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = net.compassing.mesher;
 				PRODUCT_NAME = mesher;
 				SDKROOT = iphoneos;
-				SWIFT_OBJC_BRIDGING_HEADER = "mesher Shared/ShaderTypes.h";
+				SWIFT_OBJC_BRIDGING_HEADER = shared/rendering/ShaderTypes.h;
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -482,6 +587,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = Z62WTTQ8ST;
 				INFOPLIST_FILE = "mesher iOS/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -491,7 +597,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = net.compassing.mesher;
 				PRODUCT_NAME = mesher;
 				SDKROOT = iphoneos;
-				SWIFT_OBJC_BRIDGING_HEADER = "mesher Shared/ShaderTypes.h";
+				SWIFT_OBJC_BRIDGING_HEADER = shared/rendering/ShaderTypes.h;
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
@@ -512,7 +618,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = net.compassing.mesher;
 				PRODUCT_NAME = mesher;
 				SDKROOT = appletvos;
-				SWIFT_OBJC_BRIDGING_HEADER = "mesher Shared/ShaderTypes.h";
+				SWIFT_OBJC_BRIDGING_HEADER = shared/rendering/ShaderTypes.h;
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = 3;
 				TVOS_DEPLOYMENT_TARGET = 12.1;
@@ -533,7 +639,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = net.compassing.mesher;
 				PRODUCT_NAME = mesher;
 				SDKROOT = appletvos;
-				SWIFT_OBJC_BRIDGING_HEADER = "mesher Shared/ShaderTypes.h";
+				SWIFT_OBJC_BRIDGING_HEADER = shared/rendering/ShaderTypes.h;
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = 3;
 				TVOS_DEPLOYMENT_TARGET = 12.1;
@@ -545,10 +651,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = "mesher macOS/Info.plist";
+				DEVELOPMENT_TEAM = Z62WTTQ8ST;
+				INFOPLIST_FILE = "$(SRCROOT)/macOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -556,8 +663,9 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				PRODUCT_BUNDLE_IDENTIFIER = net.compassing.mesher;
 				PRODUCT_NAME = mesher;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
-				SWIFT_OBJC_BRIDGING_HEADER = "mesher Shared/ShaderTypes.h";
+				SWIFT_OBJC_BRIDGING_HEADER = shared/rendering/ShaderTypes.h;
 				SWIFT_VERSION = 4.2;
 			};
 			name = Debug;
@@ -566,10 +674,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = "mesher macOS/Info.plist";
+				DEVELOPMENT_TEAM = Z62WTTQ8ST;
+				INFOPLIST_FILE = "$(SRCROOT)/macOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -577,8 +686,9 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				PRODUCT_BUNDLE_IDENTIFIER = net.compassing.mesher;
 				PRODUCT_NAME = mesher;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
-				SWIFT_OBJC_BRIDGING_HEADER = "mesher Shared/ShaderTypes.h";
+				SWIFT_OBJC_BRIDGING_HEADER = shared/rendering/ShaderTypes.h;
 				SWIFT_VERSION = 4.2;
 			};
 			name = Release;

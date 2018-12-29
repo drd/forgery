@@ -29,6 +29,7 @@ class GameViewController: NSViewController {
             return
         }
 
+        mtkView.clearColor = MTLClearColor.init(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
         mtkView.device = defaultDevice
 
         guard let newRenderer = Renderer(metalKitView: mtkView) else {
@@ -43,3 +44,5 @@ class GameViewController: NSViewController {
         mtkView.delegate = renderer
     }
 }
+
+

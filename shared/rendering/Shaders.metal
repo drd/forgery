@@ -18,8 +18,9 @@ using namespace metal;
 
 typedef struct
 {
-    float3 position [[attribute(VertexAttributePosition)]];
-    float2 texCoord [[attribute(VertexAttributeTexcoord)]];
+    float3 position;
+    float3 normal;
+    float2 texCoord;
 } Vertex;
 
 typedef struct
@@ -28,13 +29,17 @@ typedef struct
     float2 texCoord;
 } ColorInOut;
 
-vertex ColorInOut vertexShader(Vertex in [[stage_in]],
-                               constant Uniforms & uniforms [[ buffer(BufferIndexUniforms) ]])
+vertex ColorInOut vertexShader(constant Vertex * vertices [[ buffer(BufferIndexMeshPositions) ]],
+                               constant Uniforms & uniforms [[ buffer(BufferIndexUniforms) ]],
+                               unsigned int vid [[ vertex_id ]])
 {
     ColorInOut out;
 
+    Vertex in = vertices[vid];
+    
     float4 position = float4(in.position, 1.0);
-    out.position = uniforms.projectionMatrix * uniforms.modelViewMatrix * position;
+    float4 viewPosition = uniforms.modelViewMatrix * position;
+    out.position = uniforms.projectionMatrix * viewPosition;
     out.texCoord = in.texCoord;
 
     return out;
