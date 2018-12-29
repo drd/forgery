@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		524798F221D7E13400D2C069 /* Serialization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524798F121D7E13400D2C069 /* Serialization.swift */; };
+		524798F321D7E13400D2C069 /* Serialization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524798F121D7E13400D2C069 /* Serialization.swift */; };
+		524798F421D7E13400D2C069 /* Serialization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524798F121D7E13400D2C069 /* Serialization.swift */; };
 		5275BE9221D6C91200BA2C81 /* MeshParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5275BE9121D6C91200BA2C81 /* MeshParser.swift */; };
 		5275BE9321D6C91700BA2C81 /* MeshParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5275BE9121D6C91200BA2C81 /* MeshParser.swift */; };
 		5275BE9421D6C91700BA2C81 /* MeshParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5275BE9121D6C91200BA2C81 /* MeshParser.swift */; };
@@ -56,6 +59,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		524798F121D7E13400D2C069 /* Serialization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Serialization.swift; sourceTree = "<group>"; };
 		5275BE9121D6C91200BA2C81 /* MeshParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeshParser.swift; sourceTree = "<group>"; };
 		5275BE9521D6CFE600BA2C81 /* Geometry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Geometry.swift; sourceTree = "<group>"; };
 		5275BE9A21D6D0BF00BA2C81 /* float4x4+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "float4x4+Extensions.swift"; sourceTree = "<group>"; };
@@ -144,6 +148,7 @@
 			children = (
 				5275BEB121D6D2A700BA2C81 /* SceneConstructor.swift */,
 				5275BE9121D6C91200BA2C81 /* MeshParser.swift */,
+				524798F121D7E13400D2C069 /* Serialization.swift */,
 			);
 			path = import;
 			sourceTree = "<group>";
@@ -371,6 +376,7 @@
 				52C225B421D42F6800725E02 /* GameViewController.swift in Sources */,
 				52C225B221D42F6800725E02 /* AppDelegate.swift in Sources */,
 				5275BEA421D6D1F200BA2C81 /* float4+Extensions copy.swift in Sources */,
+				524798F221D7E13400D2C069 /* Serialization.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -390,6 +396,7 @@
 				52C225C521D42F6800725E02 /* GameViewController.swift in Sources */,
 				52C225C321D42F6800725E02 /* AppDelegate.swift in Sources */,
 				5275BEA521D6D1F200BA2C81 /* float4+Extensions copy.swift in Sources */,
+				524798F321D7E13400D2C069 /* Serialization.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -409,6 +416,7 @@
 				52C225D321D42F6800725E02 /* GameViewController.swift in Sources */,
 				52C225D121D42F6800725E02 /* AppDelegate.swift in Sources */,
 				5275BEA321D6D1F200BA2C81 /* float4+Extensions copy.swift in Sources */,
+				524798F421D7E13400D2C069 /* Serialization.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -14,7 +14,80 @@ class SceneConstructor {
     let base: URL
     let device: MTLDevice
     let fileNames: [String]
+    let queue = DispatchQueue(label: "LoadQueue", attributes: .concurrent)
+    var meshes: [Mesh]!
+
+    init(url: URL, device: MTLDevice) throws {
+        let fileManager = FileManager.default
+        self.base = url
+        self.device = device
+        print("Looking in \(url)")
+        self.fileNames = try fileManager.contentsOfDirectory(atPath: url.path).sorted()
+    }
     
+    private func serialLoad() -> [Mesh] {
+        do {
+            return try fileNames.map { name in
+                let fileURL = self.base.appendingPathComponent(name)
+                return try MeshParser(url: fileURL).parse()
+            }
+        } catch {
+            print("Failure! \(error)")
+            return [Mesh]()
+        }
+    }
+    
+    private func load() -> DispatchGroup {
+        let loadGroup = DispatchGroup()
+        meshes = [Mesh](repeating: Mesh.empty, count: fileNames.count)
+
+        for (i, name) in fileNames.enumerated() {
+            print("Enter: \(i) Loading: \(name)")
+            loadGroup.enter()
+            DispatchQueue.global(qos: .userInitiated).async {
+                do {
+                    let fileURL = self.base.appendingPathComponent(name)
+                    let mesh = try MeshParser(url: fileURL).parse()
+                    self.queue.async(flags: .barrier) {
+                        self.meshes[i] = mesh
+                        print("Mesh \(i) index count: \(self.meshes[i].indices.count)")
+                        loadGroup.leave()
+                    }
+                } catch {
+                    print("Failed to load \(name)")
+                }
+            }
+        }
+        
+        return loadGroup
+    }
+    
+    func loadAsync(completion: @escaping (CompositeMesh?) -> Void) {
+        let loadGroup = load()
+        
+        loadGroup.notify(
+            queue: DispatchQueue.global(),
+            work: DispatchWorkItem(block: {
+                do {
+                    completion(try self.constructCompositeMesh(self.meshes))
+                } catch {
+                    completion(nil)
+                }
+            })
+        )
+    }
+
+    func loadBlocking() -> CompositeMesh? {
+        do {
+            let loadGroup = load()
+            loadGroup.wait()
+            return try constructCompositeMesh(meshes) // self.serialLoad())
+        } catch {
+            print("Failure! \(error)")
+            return nil
+        }
+    }
+
     private func constructCompositeMesh(_ meshes: [Mesh]) throws -> CompositeMesh {
         var vertices = [Vertex]()
         var indices = [UInt32]()
@@ -24,7 +97,7 @@ class SceneConstructor {
             if (mesh.indices.count == 0) {
                 print("Mesh \(i) \(mesh)")
             }
-
+            
             center += mesh.center
             
             let indexOffset = indices.count
@@ -36,7 +109,7 @@ class SceneConstructor {
                 indexCount: mesh.indices.count,
                 indexOffset: indexOffset * MemoryLayout<UInt32>.stride
             )
-
+            
             vertices += mesh.vertices
             indices += mesh.indices.map { UInt32($0 + indexOffset) }
             
@@ -62,76 +135,5 @@ class SceneConstructor {
             center: center / Float(meshes.count)
         )
     }
-
-    init(url: URL, device: MTLDevice) throws {
-        let fileManager = FileManager.default
-        self.base = url
-        self.device = device
-        print("Looking in \(url)")
-        self.fileNames = try fileManager.contentsOfDirectory(atPath: url.path).sorted()
-    }
     
-    private func serialLoad() -> [Mesh] {
-        do {
-            return try fileNames.map { name in
-                let fileURL = self.base.appendingPathComponent(name)
-                return try MeshParser(url: fileURL).parse()
-            }
-        } catch {
-            print("Failure! \(error)")
-            return [Mesh]()
-        }
-    }
-    
-    private func load() -> ([Mesh], DispatchGroup) {
-        var meshes = [Mesh](repeating: Mesh.empty, count: fileNames.count)
-        let loadGroup = DispatchGroup()
-        
-        for (i, name) in fileNames.enumerated() {
-            print("Enter: \(i) Loading: \(name)")
-            loadGroup.enter()
-            DispatchQueue.global(qos: .userInitiated).async {
-                defer {
-                    print("Leave \(i)")
-                    loadGroup.leave()
-                }
-                do {
-                    let fileURL = self.base.appendingPathComponent(name)
-                    let mesh = try MeshParser(url: fileURL).parse()
-                    meshes[i] = mesh
-                    print("Mesh \(i) index count: \(meshes[i].indices.count)")
-                } catch {
-                    print("Failed to load \(name)")
-                }
-            }
-        }
-        
-        return (meshes, loadGroup)
-    }
-    
-    func loadAsync(completion: @escaping (CompositeMesh?) -> Void) {
-        let (meshes, loadGroup) = load()
-        
-        loadGroup.notify(
-            queue: DispatchQueue.global(),
-            work: DispatchWorkItem(block: {
-                do {
-                    completion(try self.constructCompositeMesh(meshes))
-                } catch {
-                    completion(nil)
-                }
-            })
-        )
-    }
-
-    func loadBlocking() -> CompositeMesh? {
-        do {
-//            let (meshes, loadGroup) = load()
-//            loadGroup.wait()
-            return try constructCompositeMesh(self.serialLoad())
-        } catch {
-            print("Failure! \(error)")
-            return nil
-        }
-    }
 }

@@ -43,7 +43,7 @@ class Renderer: NSObject, MTKViewDelegate {
     var panning: float3 = float3()
     var rotation: float3 = float3()
 
-    var mesh: CompositeMesh
+    var mesh: CompositeMesh!
     
     init?(metalKitView: MTKView) {
         self.device = metalKitView.device!
@@ -80,14 +80,6 @@ class Renderer: NSObject, MTKViewDelegate {
         depthState = state
         
         do {
-            mesh = try Renderer.buildMesh(device: device)
-            print("Center: \(mesh.center)")
-        } catch {
-            print("Unable to load mesh. Error info: \(error)")
-            return nil
-        }
-
-        do {
             colorMap = try Renderer.loadTexture(device: device, textureName: "ColorMap")
         } catch {
             print("Unable to load texture. Error info: \(error)")
@@ -95,6 +87,13 @@ class Renderer: NSObject, MTKViewDelegate {
         }
         
         super.init()
+
+        do {
+            try buildMesh(device: device)
+        } catch {
+            print("Unable to load mesh. Error info: \(error)")
+            return nil
+        }
     }
     
 //    class func buildMetalVertexDescriptor() -> MTLVertexDescriptor {
@@ -152,11 +151,14 @@ class Renderer: NSObject, MTKViewDelegate {
         return try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
     }
     
-    class func buildMesh(device: MTLDevice) throws -> CompositeMesh {
-        return try SceneConstructor(
+    func buildMesh(device: MTLDevice) throws {
+        try SceneConstructor(
             url: URL(fileURLWithPath: "/Users/eoconnell/workspace/bim/unity/unity-investigation/output_1/meshes"),
             device: device
-        ).loadBlocking()!
+        ).loadAsync { mesh in
+            self.mesh = mesh
+            print("Center: \(self.mesh.center)")
+        }
     }
     
     class func loadTexture(device: MTLDevice,
@@ -207,12 +209,12 @@ class Renderer: NSObject, MTKViewDelegate {
         
         uniforms[0].modelViewMatrix =
             float4x4.init(diagonal: float4(1, 1, 1, 1))
-            * float4x4.makeTranslation(panning.x, panning.y, panning.z)
             .rotateAround(
                     x: rotation.x,
                     y: rotation.y,
                     z: rotation.z
             )
+            * float4x4.makeTranslation(panning.x, panning.y, panning.z)
             * axis
             * float4x4.makeScale(0.01, 0.01, 0.01)
             * matrix4x4_translation(-4.3, -12.5, -111.4)
@@ -220,6 +222,10 @@ class Renderer: NSObject, MTKViewDelegate {
     
     func draw(in view: MTKView) {
         /// Per frame updates hare
+        
+        if (mesh == nil) {
+            return
+        }
         
         _ = inFlightSemaphore.wait(timeout: DispatchTime.distantFuture)
         
