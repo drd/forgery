@@ -24,6 +24,12 @@ struct Mesh {
     let vertices: [Vertex]
     let indices: [Int]
     
+    var center: float3 {
+        get {
+            return vertices.reduce(float3()) { acc, v in acc + v.position } / Float(vertices.count)
+        }
+    }
+    
     static let empty = Mesh(
         vertices: [Vertex](),
         indices: [Int]()
@@ -50,4 +56,5 @@ struct CompositeMesh {
     let vertexBuffer: MTLBuffer
     let indexBuffer: MTLBuffer
     let submeshes: [Submesh]
+    let center: float3
 }

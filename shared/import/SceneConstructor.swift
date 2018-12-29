@@ -18,12 +18,15 @@ class SceneConstructor {
     private func constructCompositeMesh(_ meshes: [Mesh]) throws -> CompositeMesh {
         var vertices = [Vertex]()
         var indices = [UInt32]()
+        var center = float3()
         
         let submeshes = meshes.enumerated().map { (i, mesh) -> Submesh in
             if (mesh.indices.count == 0) {
                 print("Mesh \(i) \(mesh)")
             }
 
+            center += mesh.center
+            
             let indexOffset = indices.count
             
             let submesh = Submesh(
@@ -33,8 +36,6 @@ class SceneConstructor {
                 indexCount: mesh.indices.count,
                 indexOffset: indexOffset * MemoryLayout<UInt32>.stride
             )
-
-            print("Submesh: \(submesh)")
 
             vertices += mesh.vertices
             indices += mesh.indices.map { UInt32($0 + indexOffset) }
@@ -57,7 +58,8 @@ class SceneConstructor {
         return CompositeMesh(
             vertexBuffer: vertexBuffer!,
             indexBuffer: indexBuffer!,
-            submeshes: submeshes
+            submeshes: submeshes,
+            center: center / Float(meshes.count)
         )
     }
 

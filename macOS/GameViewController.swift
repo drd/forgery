@@ -43,6 +43,42 @@ class GameViewController: NSViewController {
 
         mtkView.delegate = renderer
     }
+    
+    override func scrollWheel(with event: NSEvent) {
+        if (event.modifierFlags.isEmpty) {
+            renderer?.scrolled(
+                delta: float3(
+                    Float(event.scrollingDeltaX),
+                    Float(event.scrollingDeltaY),
+                    0
+                )
+            )
+        } else if (event.modifierFlags.contains(.option) && event.modifierFlags.contains(.shift)) {
+            renderer?.rotated(
+                delta: float3(
+                    0,
+                    -Float(event.scrollingDeltaY),
+                    -Float(event.scrollingDeltaX)
+                )
+            )
+        } else if (event.modifierFlags.contains(.option)) {
+            renderer?.rotated(
+                delta: float3(
+                    -Float(event.scrollingDeltaY),
+                    -Float(event.scrollingDeltaX),
+                    0
+                )
+            )
+        } else if (event.modifierFlags.contains(.shift)) {
+            renderer?.scrolled(
+                delta: float3(
+                    Float(event.scrollingDeltaX),
+                    0,
+                    Float(event.scrollingDeltaY)
+                )
+            )
+        }
+    }
 }
 
 

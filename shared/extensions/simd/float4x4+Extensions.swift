@@ -71,11 +71,11 @@ extension float4x4 {
         self = float4x4.makeRotate(radians, x, y, z) * self
     }
     
-    mutating func rotateAroundX(_ x: Float, y: Float, z: Float) {
+    func rotateAround(x: Float, y: Float, z: Float) -> float4x4 {
         var rotationM = float4x4.makeRotate(x, 1, 0, 0)
         rotationM = rotationM * float4x4.makeRotate(y, 0, 1, 0)
         rotationM = rotationM * float4x4.makeRotate(z, 0, 0, 1)
-        self = self * rotationM
+        return self * rotationM
     }
     
     mutating func translate(_ x: Float, y: Float, z: Float) {

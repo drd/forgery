@@ -40,8 +40,9 @@ class Renderer: NSObject, MTKViewDelegate {
     
     var projectionMatrix: matrix_float4x4 = matrix_float4x4()
     
-    var rotation: Float = 0
-    
+    var panning: float3 = float3()
+    var rotation: float3 = float3()
+
     var mesh: CompositeMesh
     
     init?(metalKitView: MTKView) {
@@ -80,6 +81,7 @@ class Renderer: NSObject, MTKViewDelegate {
         
         do {
             mesh = try Renderer.buildMesh(device: device)
+            print("Center: \(mesh.center)")
         } catch {
             print("Unable to load mesh. Error info: \(error)")
             return nil
@@ -185,17 +187,35 @@ class Renderer: NSObject, MTKViewDelegate {
         uniforms = UnsafeMutableRawPointer(dynamicUniformBuffer.contents() + uniformBufferOffset).bindMemory(to:Uniforms.self, capacity:1)
     }
     
+    func scrolled(delta: float3) {
+        panning += delta / 1000
+    }
+
+    func rotated(delta: float3) {
+        rotation += delta / 1000
+    }
+    
+
     private func updateGameState() {
         /// Update any game state before rendering
         
         uniforms[0].projectionMatrix = projectionMatrix
         
-        let rotationAxis = float3(1, 1, 0)
-        let modelMatrix = matrix4x4_rotation(radians: rotation, axis: rotationAxis)
+        let axis = float4x4.makeRotate(
+            float4x4.degrees(toRad: -90), 1, 0, 0
+        )
         
-        let viewMatrix = float4x4.makeScale(0.01, 0.01, 0.01) * matrix4x4_translation(48, 105, -156.0)
-        uniforms[0].modelViewMatrix = viewMatrix * modelMatrix; // simd_mul(viewMatrix, modelMatrix)
-        rotation += 0.01
+        uniforms[0].modelViewMatrix =
+            float4x4.init(diagonal: float4(1, 1, 1, 1))
+            * float4x4.makeTranslation(panning.x, panning.y, panning.z)
+            .rotateAround(
+                    x: rotation.x,
+                    y: rotation.y,
+                    z: rotation.z
+            )
+            * axis
+            * float4x4.makeScale(0.01, 0.01, 0.01)
+            * matrix4x4_translation(-4.3, -12.5, -111.4)
     }
     
     func draw(in view: MTKView) {
@@ -268,7 +288,7 @@ class Renderer: NSObject, MTKViewDelegate {
         projectionMatrix = matrix_perspective_right_hand(
             fovyRadians: radians_from_degrees(65),
             aspectRatio:aspect,
-            nearZ: 0.1,
+            nearZ: 0.01,
             farZ: 100.0
         )
     }
