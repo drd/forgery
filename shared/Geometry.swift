@@ -15,12 +15,14 @@ enum GeometryError: Error {
 }
 
 struct Material {
-    let ambient: float4?
-    let diffuse: float4?
+    let ambient: float4
+    let diffuse: float4
+    let specular: float4
     
     static let empty = Material(
         ambient: float4(),
-        diffuse: float4()
+        diffuse: float4(),
+        specular: float4()
     )
 }
 
@@ -28,6 +30,7 @@ struct Vertex {
     let position: float3
     let normal: float3
     let uv: float2
+    let material: Material
 }
 
 struct Mesh {
@@ -38,6 +41,17 @@ struct Mesh {
     var center: float3 {
         get {
             return vertices.reduce(float3()) { acc, v in acc + v.position } / Float(vertices.count)
+        }
+    }
+    
+    func materializedVertices(_ material: Material) -> [Vertex] {
+        return vertices.map {
+            Vertex(
+                position: $0.position,
+                normal: $0.normal,
+                uv: $0.uv,
+                material: material
+            )
         }
     }
     

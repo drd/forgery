@@ -96,39 +96,6 @@ class Renderer: NSObject, MTKViewDelegate {
         }
     }
     
-//    class func buildMetalVertexDescriptor() -> MTLVertexDescriptor {
-//        // Creete a Metal vertex descriptor specifying how vertices will by laid out for input into our render
-//        //   pipeline and how we'll layout our Model IO vertices
-//
-//        let mtlVertexDescriptor = MTLVertexDescriptor()
-//
-//        mtlVertexDescriptor.attributes[VertexAttribute.position.rawValue].format = MTLVertexFormat.float3
-//        mtlVertexDescriptor.attributes[VertexAttribute.position.rawValue].offset = 0
-//        mtlVertexDescriptor.attributes[VertexAttribute.position.rawValue].bufferIndex = BufferIndex.meshPositions.rawValue
-//
-//        mtlVertexDescriptor.attributes[VertexAttribute.normal.rawValue].format = MTLVertexFormat.float3
-//        mtlVertexDescriptor.attributes[VertexAttribute.normal.rawValue].offset = 0
-//        mtlVertexDescriptor.attributes[VertexAttribute.normal.rawValue].bufferIndex = BufferIndex.meshNormals.rawValue
-//
-//        mtlVertexDescriptor.attributes[VertexAttribute.texcoord.rawValue].format = MTLVertexFormat.float2
-//        mtlVertexDescriptor.attributes[VertexAttribute.texcoord.rawValue].offset = 0
-//        mtlVertexDescriptor.attributes[VertexAttribute.texcoord.rawValue].bufferIndex = BufferIndex.meshGenerics.rawValue
-//
-//        mtlVertexDescriptor.layouts[BufferIndex.meshPositions.rawValue].stride = 12
-//        mtlVertexDescriptor.layouts[BufferIndex.meshPositions.rawValue].stepRate = 1
-//        mtlVertexDescriptor.layouts[BufferIndex.meshPositions.rawValue].stepFunction = MTLVertexStepFunction.perVertex
-//
-//        mtlVertexDescriptor.layouts[BufferIndex.meshNormals.rawValue].stride = 12
-//        mtlVertexDescriptor.layouts[BufferIndex.meshNormals.rawValue].stepRate = 1
-//        mtlVertexDescriptor.layouts[BufferIndex.meshNormals.rawValue].stepFunction = MTLVertexStepFunction.perVertex
-//
-//        mtlVertexDescriptor.layouts[BufferIndex.meshGenerics.rawValue].stride = 8
-//        mtlVertexDescriptor.layouts[BufferIndex.meshGenerics.rawValue].stepRate = 1
-//        mtlVertexDescriptor.layouts[BufferIndex.meshGenerics.rawValue].stepFunction = MTLVertexStepFunction.perVertex
-//
-//        return mtlVertexDescriptor
-//    }
-    
     class func buildRenderPipelineWithDevice(device: MTLDevice,
                                              metalKitView: MTKView) throws -> MTLRenderPipelineState {
         /// Build a render state pipeline object
@@ -145,6 +112,14 @@ class Renderer: NSObject, MTKViewDelegate {
         pipelineDescriptor.fragmentFunction = fragmentFunction
         
         pipelineDescriptor.colorAttachments[0].pixelFormat = metalKitView.colorPixelFormat
+        pipelineDescriptor.colorAttachments[0].isBlendingEnabled = true
+//        pipelineDescriptor.colorAttachments[0].rgbBlendOperation = MTLBlendOperation.add;
+//        pipelineDescriptor.colorAttachments[0].alphaBlendOperation = MTLBlendOperation.add;
+        pipelineDescriptor.colorAttachments[0].sourceRGBBlendFactor = MTLBlendFactor.sourceAlpha;
+        pipelineDescriptor.colorAttachments[0].sourceAlphaBlendFactor = MTLBlendFactor.sourceAlpha;
+        pipelineDescriptor.colorAttachments[0].destinationRGBBlendFactor = MTLBlendFactor.oneMinusSourceAlpha
+        pipelineDescriptor.colorAttachments[0].destinationAlphaBlendFactor = MTLBlendFactor.oneMinusSourceAlpha;
+
         pipelineDescriptor.depthAttachmentPixelFormat = metalKitView.depthStencilPixelFormat
         pipelineDescriptor.stencilAttachmentPixelFormat = metalKitView.depthStencilPixelFormat
         
@@ -153,7 +128,7 @@ class Renderer: NSObject, MTKViewDelegate {
     
     func buildMesh(device: MTLDevice) throws {
         try SceneConstructor(
-            url: URL(fileURLWithPath: "/Users/eoconnell/workspace/bim/forge-investigation/scenes/house"),
+            url: URL(fileURLWithPath: "/Users/eoconnell/workspace/bim/forge-investigation/scenes/cscc"),
             device: device
         ).loadAsync { mesh in
             self.mesh = mesh

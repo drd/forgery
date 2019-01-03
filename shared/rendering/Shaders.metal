@@ -21,11 +21,17 @@ typedef struct
     float3 position;
     float3 normal;
     float2 texCoord;
+    float4 ambient;
+    float4 diffuse;
+    float4 specular;
 } Vertex;
 
 typedef struct
 {
     float4 position [[position]];
+    float4 ambient;
+    float4 diffuse;
+    float4 specular;
     float2 texCoord;
 } ColorInOut;
 
@@ -41,6 +47,8 @@ vertex ColorInOut vertexShader(constant Vertex * vertices [[ buffer(BufferIndexM
     float4 viewPosition = uniforms.modelViewMatrix * position;
     out.position = uniforms.projectionMatrix * viewPosition;
     out.texCoord = in.texCoord;
+    out.ambient = in.ambient;
+    out.diffuse = in.diffuse;
 
     return out;
 }
@@ -55,5 +63,5 @@ fragment float4 fragmentShader(ColorInOut in [[stage_in]],
 
     half4 colorSample   = colorMap.sample(colorSampler, in.texCoord.xy);
 
-    return float4(colorSample);
+    return in.ambient; // + in.diffuse + in.specular;
 }

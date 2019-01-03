@@ -64,7 +64,9 @@ class MeshParser {
             Vertex(
                 position: coord,
                 normal: normals[i],
-                uv: uvs[i])
+                uv: uvs[i],
+                material: Material.empty
+            )
         }
         
         return Mesh(

@@ -11,6 +11,11 @@ import Metal
 import simd
 
 class SceneConstructor {
+    struct PendingMesh {
+        let mesh: Mesh
+        let materialId: String
+    }
+    
     let baseDir: URL
     private var instanceTreeUrl: URL {
         return baseDir.appendingPathComponent("instancetree.json")
@@ -34,7 +39,7 @@ class SceneConstructor {
     let loadGroup = DispatchGroup()
 
     let decoder = JSONDecoder()
-    var meshes = [String: Mesh]()
+    var pendingMeshes = [String: PendingMesh]()
     var materials = [String: Material]()
     
     var instanceTree: Node!
@@ -86,10 +91,10 @@ class SceneConstructor {
             // TODO: handle transform matrixes
             print(node.mtype)
         case "Mesh":
-            for (fragmentId, materialId) in zip(node.fragments!, node.materials!) {
+            for (fragmentId, materialId) in zip(node.fragments!, node.materials!.map(String.init)) {
                 self.loadMaterial(String(materialId))
                 // TODO: don't hardcode scene id
-                self.loadMesh(1, node.id, fragmentId)
+                self.loadMesh(1, node.id, fragmentId, materialId)
             }
         default:
             print("Unknown Node type: \(node.type)")
@@ -101,28 +106,38 @@ class SceneConstructor {
     }
     
     private func loadMaterial(_ materialId: String) {
-        loadGroup.enter()
-        DispatchQueue.global(qos: .userInitiated).async {
+//        loadGroup.enter()
+//        DispatchQueue.global(qos: .userInitiated).async {
             var loaded = false
             
-            self.loadQueue.sync {
+//            self.loadQueue.sync {
                 if self.materials[materialId] != nil {
                     loaded = true
                 }
                 print("Hey saved some time there for \(materialId)")
-            }
+//            }
 
             if !loaded {
                 do {
                     if let materialUrl = self.materialFiles[materialId] {
                         let svfMaterial = try self.decoder.decode(SVFMaterial.self, from: Data(contentsOf: materialUrl))
                         if let defn = svfMaterial.materials.first {
-                            let ambient = defn.value.properties.colors.generic_ambient?.float4
-                            let diffuse = defn.value.properties.colors.generic_ambient?.float4
+                            var ambient = defn.value.properties.colors.generic_ambient?.float4
+                            var diffuse = defn.value.properties.colors.generic_diffuse?.float4
+                            var specular = defn.value.properties.colors.generic_specular?.float4
+                            let opacity: Float = 1.0 - (defn.value.properties.scalars.generic_transparency?.values.first ?? 0.0)
+                            
+                            ambient?.w = opacity
+                            diffuse?.w = opacity
+                            specular?.w = opacity
 //                            self.loadGroup.enter()
 //                            self.loadQueue.async(flags: .barrier) {
                                 print("Stored material: \(materialId)")
-                                self.materials[materialId] = Material(ambient: ambient, diffuse: diffuse)
+                                self.materials[materialId] = Material(
+                                    ambient: ambient ?? diffuse ?? float4(),
+                                    diffuse: diffuse ?? float4(),
+                                    specular: specular ?? float4()
+                            )
 //                                self.loadGroup.leave()
 //                            }
                         }
@@ -130,15 +145,15 @@ class SceneConstructor {
                 } catch {
                     print("Error loading material \(materialId): \(error)")
                 }
-            }
-
-            self.loadGroup.leave()
+//            }
+//
+//            self.loadGroup.leave()
         }
     }
     
-    private func loadMesh(_ sceneId: Int, _ nodeId: Int, _ fragmentId: Int) {
-        loadGroup.enter()
-        DispatchQueue.global(qos: .userInitiated).async {
+    private func loadMesh(_ sceneId: Int, _ nodeId: Int, _ fragmentId: Int, _ materialId: String) {
+//        loadGroup.enter()
+//        DispatchQueue.global(qos: .userInitiated).async {
             let meshId = "\(sceneId)-\(nodeId)-\(fragmentId)"
             do {
                 if let meshUrl = self.meshFiles[meshId] {
@@ -146,7 +161,10 @@ class SceneConstructor {
 //                    self.loadGroup.enter()
 //                    self.loadQueue.async(flags: .barrier) {
                         print("Storing mesh \(meshId)")
-                        self.meshes[meshId] = mesh
+                    self.pendingMeshes[meshId] = PendingMesh(
+                        mesh: mesh,
+                        materialId: materialId
+                    )
 //                        self.loadGroup.leave()
 //                    }
                 }
@@ -154,8 +172,8 @@ class SceneConstructor {
                 print("Error loading mesh: \(meshId): \(error)")
             }
 
-            self.loadGroup.leave()
-        }
+//            self.loadGroup.leave()
+//        }
     }
     
     private func load(nodes: [Node]) {
@@ -183,6 +201,16 @@ class SceneConstructor {
 //        return loadGroup
     }
     
+    private func resolveMeshMaterials() -> [Mesh] {
+        return pendingMeshes.map { (meshId, pendingMesh) in
+            Mesh(
+                vertices: pendingMesh.mesh.vertices,
+                indices: pendingMesh.mesh.indices,
+                material: materials[pendingMesh.materialId] ?? pendingMesh.mesh.material
+            )
+        }
+    }
+    
     func loadAsync(completion: @escaping (CompositeMesh?) -> Void) {
         if let children = instanceTree.childs {
             load(nodes: children)
@@ -192,7 +220,7 @@ class SceneConstructor {
             queue: DispatchQueue.global(),
             work: DispatchWorkItem(block: {
                 do {
-                    completion(try self.constructCompositeMesh(Array(self.meshes.values)))
+                    completion(try self.constructCompositeMesh(self.resolveMeshMaterials()))
                 } catch {
                     completion(nil)
                 }
@@ -207,7 +235,7 @@ class SceneConstructor {
             }
 
             loadGroup.wait()
-            return try constructCompositeMesh(Array(self.meshes.values)) // self.serialLoad())
+            return try constructCompositeMesh(self.resolveMeshMaterials())
         } catch {
             print("Failure! \(error)")
             return nil
@@ -224,6 +252,8 @@ class SceneConstructor {
                 print("Mesh \(i) \(mesh)")
             }
             
+            let material = mesh.material
+            
             center += mesh.center
             
             let indexOffset = indices.count
@@ -236,7 +266,7 @@ class SceneConstructor {
                 indexOffset: indexOffset * MemoryLayout<UInt32>.stride
             )
             
-            vertices += mesh.vertices
+            vertices += mesh.materializedVertices(material)
             indices += mesh.indices.map { UInt32($0 + indexOffset) }
             
             return submesh
