@@ -7,19 +7,21 @@
 //
 
 import Foundation
+import simd
 
-//- Instance tree
+// MARK: Instance tree
 
 struct Node : Codable {
     var mtype: String
     
-    var childs: [Node]
+    var childs: [Node]?
     var id: Int
     var pathid: String
     var type: String
     var polys: Int
-    var fragments: [Int]
-    var materials: [Int]
+    var fragPolys: [Int]?
+    var fragments: [Int]?
+    var materials: [Int]?
 }
 
 struct Vector3 : Codable {
@@ -48,143 +50,67 @@ struct Metadata : Codable {
     var worldUpVector: Vector3
 }
 
-/*
-{
-    "childs": [
-    {
-    "childs": null,
-    "id": 0,
-    "mtype": "Identity",
-    "pathid": "0",
-    "polys": 0,
-    "type": "Transform"
-    },
-    {
-    "childs": [
-    {
-    "fragPolys": [
-    58
-    ],
-    "fragments": [
-    51
-    ],
-    "id": 12425,
-    "materials": [
-    2
-    ],
-    "mtype": "Identity",
-    "pathid": "1:0",
-    "polys": 58,
-    "type": "Mesh"
-    },
-    {
-    "fragPolys": [
-    4
-    ],
-    "fragments": [
-    6907
-    ],
-    "id": 12425,
-    "materials": [
-    3
-    ],
-    "mtype": "Identity",
-    "pathid": "1:1",
-    "polys": 4,
-    "type": "Mesh"
+// MARK: Material
+
+struct SVFMaterial : Codable {
+
+    struct Properties : Codable {
+        struct Booleans : Codable {
+            var color_by_object: Bool?
+            var generic_backface_cull: Bool?
+            var generic_is_metal: Bool?
+        }
+        
+        struct Color : Codable {
+            var r: Float
+            var g: Float
+            var b: Float
+            var a: Float
+        }
+        
+        struct ColorValues : Codable {
+            var values: [Color]
+
+            var float4: float4 {
+                if let value = values.first {
+                    return simd.float4(value.r, value.g, value.b, value.a)
+                }
+                return simd.float4()
+            }
+        }
+        
+        struct Colors : Codable {
+            var generic_ambient: ColorValues?
+            var generic_diffuse: ColorValues?
+            var generic_specular: ColorValues?
+        }
+        
+        struct Scalar : Codable {
+            var units: String
+            var values: [Float]
+        }
+        
+        struct Scalars : Codable {
+            var generic_transparency: Scalar?
+            var generic_glossiness: Scalar?
+        }
+        
+        var booleans: Booleans
+        var colors: Colors
+        var scalars: Scalars
     }
-    ],
-    "id": 12425,
-    "mtype": "Identity",
-    "pathid": "1",
-    "polys": 62,
-    "type": "Transform"
-    },
-    {
-    "childs": [
-    {
-    "fragPolys": [
-    12
-    ],
-    "fragments": [
-    107
-    ],
-    "id": 12430,
-    "materials": [
-    2
-    ],
-    "mtype": "Identity",
-    "pathid": "2:0",
-    "polys": 12,
-    "type": "Mesh"
+
+    struct Definition : Codable {
+        var tag: String
+        var proteinType: String
+        var definition: String
+        var properties: Properties
     }
-    ],
-    "id": 12430,
-    "mtype": "Identity",
-    "pathid": "2",
-    "polys": 12,
-    "type": "Transform"
-    },
-    {
-    "childs": [
-    {
-    "fragPolys": [
-    8
-    ],
-    "fragments": [
-    992
-    ],
-    "id": 12434,
-    "materials": [
-    4
-    ],
-    "mtype": "Identity",
-    "pathid": "3:0",
-    "polys": 8,
-    "type": "Mesh"
-    },
-    {
-    "fragPolys": [
-    6
-    ],
-    "fragments": [
-    987
-    ],
-    "id": 12434,
-    "materials": [
-    3
-    ],
-    "mtype": "Identity",
-    "pathid": "3:1",
-    "polys": 6,
-    "type": "Mesh"
-    },
-    {
-    "fragPolys": [
-    36
-    ],
-    "fragments": [
-    1754
-    ],
-    "id": 12434,
-    "materials": [
-    5
-    ],
-    "mtype": "Identity",
-    "pathid": "3:2",
-    "polys": 36,
-    "type": "Mesh"
-    }
-    ],
-    "id": 12434,
-    "mtype": "Identity",
-    "pathid": "3",
-    "polys": 50,
-    "type": "Transform"
-    },
-*/
- 
-//- Material
+
+    var version: Int
+    var userassets: [String]
+    var materials: [String: Definition]
+}
 
 /*
 {

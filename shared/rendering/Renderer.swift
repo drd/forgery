@@ -153,7 +153,7 @@ class Renderer: NSObject, MTKViewDelegate {
     
     func buildMesh(device: MTLDevice) throws {
         try SceneConstructor(
-            url: URL(fileURLWithPath: "/Users/eoconnell/workspace/bim/unity/unity-investigation/output_1/meshes"),
+            url: URL(fileURLWithPath: "/Users/eoconnell/workspace/bim/forge-investigation/scenes/house"),
             device: device
         ).loadAsync { mesh in
             self.mesh = mesh
@@ -217,7 +217,7 @@ class Renderer: NSObject, MTKViewDelegate {
             * float4x4.makeTranslation(panning.x, panning.y, panning.z)
             * axis
             * float4x4.makeScale(0.01, 0.01, 0.01)
-            * matrix4x4_translation(-4.3, -12.5, -111.4)
+            * matrix4x4_translation(-14.3, 7.6, -6.7)
     }
     
     func draw(in view: MTKView) {

@@ -11,25 +11,68 @@ import Metal
 import simd
 
 class SceneConstructor {
-    let base: URL
-    let device: MTLDevice
-    let fileNames: [String]
-    let queue = DispatchQueue(label: "LoadQueue", attributes: .concurrent)
-    var meshes: [Mesh]!
+    let baseDir: URL
+    private var instanceTreeUrl: URL {
+        return baseDir.appendingPathComponent("instancetree.json")
+    }
+    private var materialDir: URL {
+        return baseDir.appendingPathComponent("materials")
+    }
+    private var meshDir: URL {
+        return baseDir.appendingPathComponent("meshes")
+    }
+    private var propertyDir: URL {
+        return baseDir.appendingPathComponent("properties")
+    }
+    private var textureDir: URL {
+        return baseDir.appendingPathComponent("textures")
+    }
 
+    let device: MTLDevice
+
+    let loadQueue = DispatchQueue(label: "LoadQueue", attributes: .concurrent)
+    let loadGroup = DispatchGroup()
+
+    let decoder = JSONDecoder()
+    var meshes = [String: Mesh]()
+    var materials = [String: Material]()
+    
+    var instanceTree: Node!
+
+    lazy var meshFiles: [String: URL] = directoryAsDict(dir: self.meshDir)
+    lazy var materialFiles: [String: URL] = directoryAsDict(dir: self.materialDir)
+
+    private func directoryAsDict(dir: URL) -> [String: URL] {
+        do {
+            let fileUrls = try FileManager.default
+                .contentsOfDirectory(
+                    atPath: dir.path
+                )
+                .map { dir.appendingPathComponent($0) }
+            return Dictionary.init(
+                uniqueKeysWithValues: fileUrls.map {
+                    (String($0.lastPathComponent.split(separator: ".").first!), $0)
+                }
+            )
+        } catch {
+            print("Error loading \(dir): \(error)")
+            return [:]
+        }
+    }
+    
     init(url: URL, device: MTLDevice) throws {
-        let fileManager = FileManager.default
-        self.base = url
+        self.baseDir = url
         self.device = device
         print("Looking in \(url)")
-        self.fileNames = try fileManager.contentsOfDirectory(atPath: url.path).sorted()
+        self.instanceTree = try decoder.decode(Node.self, from:
+            Data.init(contentsOf: baseDir.appendingPathComponent("instancetree.json"))
+        )
     }
     
     private func serialLoad() -> [Mesh] {
         do {
-            return try fileNames.map { name in
-                let fileURL = self.base.appendingPathComponent(name)
-                return try MeshParser(url: fileURL).parse()
+            return try meshFiles.map { (key, url) in
+                try MeshParser(url: url).parse()
             }
         } catch {
             print("Failure! \(error)")
@@ -37,39 +80,119 @@ class SceneConstructor {
         }
     }
     
-    private func load() -> DispatchGroup {
-        let loadGroup = DispatchGroup()
-        meshes = [Mesh](repeating: Mesh.empty, count: fileNames.count)
-
-        for (i, name) in fileNames.enumerated() {
-            print("Enter: \(i) Loading: \(name)")
-            loadGroup.enter()
-            DispatchQueue.global(qos: .userInitiated).async {
-                do {
-                    let fileURL = self.base.appendingPathComponent(name)
-                    let mesh = try MeshParser(url: fileURL).parse()
-                    self.queue.async(flags: .barrier) {
-                        self.meshes[i] = mesh
-                        print("Mesh \(i) index count: \(self.meshes[i].indices.count)")
-                        loadGroup.leave()
-                    }
-                } catch {
-                    print("Failed to load \(name)")
-                }
+    private func loadNode(_ node: Node) {
+        switch (node.type) {
+        case "Transform":
+            // TODO: handle transform matrixes
+            print(node.mtype)
+        case "Mesh":
+            for (fragmentId, materialId) in zip(node.fragments!, node.materials!) {
+                self.loadMaterial(String(materialId))
+                // TODO: don't hardcode scene id
+                self.loadMesh(1, node.id, fragmentId)
             }
+        default:
+            print("Unknown Node type: \(node.type)")
         }
         
-        return loadGroup
+        if let children = node.childs {
+            self.load(nodes: children)
+        }
+    }
+    
+    private func loadMaterial(_ materialId: String) {
+        loadGroup.enter()
+        DispatchQueue.global(qos: .userInitiated).async {
+            var loaded = false
+            
+            self.loadQueue.sync {
+                if self.materials[materialId] != nil {
+                    loaded = true
+                }
+                print("Hey saved some time there for \(materialId)")
+            }
+
+            if !loaded {
+                do {
+                    if let materialUrl = self.materialFiles[materialId] {
+                        let svfMaterial = try self.decoder.decode(SVFMaterial.self, from: Data(contentsOf: materialUrl))
+                        if let defn = svfMaterial.materials.first {
+                            let ambient = defn.value.properties.colors.generic_ambient?.float4
+                            let diffuse = defn.value.properties.colors.generic_ambient?.float4
+//                            self.loadGroup.enter()
+//                            self.loadQueue.async(flags: .barrier) {
+                                print("Stored material: \(materialId)")
+                                self.materials[materialId] = Material(ambient: ambient, diffuse: diffuse)
+//                                self.loadGroup.leave()
+//                            }
+                        }
+                    }
+                } catch {
+                    print("Error loading material \(materialId): \(error)")
+                }
+            }
+
+            self.loadGroup.leave()
+        }
+    }
+    
+    private func loadMesh(_ sceneId: Int, _ nodeId: Int, _ fragmentId: Int) {
+        loadGroup.enter()
+        DispatchQueue.global(qos: .userInitiated).async {
+            let meshId = "\(sceneId)-\(nodeId)-\(fragmentId)"
+            do {
+                if let meshUrl = self.meshFiles[meshId] {
+                    let mesh = try MeshParser(url: meshUrl).parse()
+//                    self.loadGroup.enter()
+//                    self.loadQueue.async(flags: .barrier) {
+                        print("Storing mesh \(meshId)")
+                        self.meshes[meshId] = mesh
+//                        self.loadGroup.leave()
+//                    }
+                }
+            } catch {
+                print("Error loading mesh: \(meshId): \(error)")
+            }
+
+            self.loadGroup.leave()
+        }
+    }
+    
+    private func load(nodes: [Node]) {
+        for node in nodes {
+            loadNode(node)
+        }
+        
+//        for (i, fileURL) in meshFiles.enumerated() {
+//            print("Enter: \(i) Loading: \(fileURL)")
+//            loadGroup.enter()
+//            DispatchQueue.global(qos: .userInitiated).async {
+//                do {
+//                    let mesh = try MeshParser(url: fileURL).parse()
+//                    self.queue.async(flags: .barrier) {
+//                        self.meshes[i] = mesh
+//                        print("Mesh \(i) index count: \(self.meshes[i].indices.count)")
+//                        loadGroup.leave()
+//                    }
+//                } catch {
+//                    print("Failed to load \(fileURL)")
+//                }
+//            }
+//        }
+        
+//        return loadGroup
     }
     
     func loadAsync(completion: @escaping (CompositeMesh?) -> Void) {
-        let loadGroup = load()
+        if let children = instanceTree.childs {
+            load(nodes: children)
+        }
         
         loadGroup.notify(
             queue: DispatchQueue.global(),
             work: DispatchWorkItem(block: {
                 do {
-                    completion(try self.constructCompositeMesh(self.meshes))
+                    completion(try self.constructCompositeMesh(Array(self.meshes.values)))
                 } catch {
                     completion(nil)
                 }
@@ -79,9 +202,12 @@ class SceneConstructor {
 
     func loadBlocking() -> CompositeMesh? {
         do {
-            let loadGroup = load()
+            if let children = instanceTree.childs {
+                load(nodes: children)
+            }
+
             loadGroup.wait()
-            return try constructCompositeMesh(meshes) // self.serialLoad())
+            return try constructCompositeMesh(Array(self.meshes.values)) // self.serialLoad())
         } catch {
             print("Failure! \(error)")
             return nil

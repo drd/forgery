@@ -67,7 +67,11 @@ class MeshParser {
                 uv: uvs[i])
         }
         
-        return Mesh(vertices: vertices, indices: indices)
+        return Mesh(
+            vertices: vertices,
+            indices: indices,
+            material: Material.empty
+        )
     }
     
     func makeNormals(_ vertices: [float3], _ triangles: [Int]) -> [float3] {

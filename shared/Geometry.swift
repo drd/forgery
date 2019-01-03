@@ -14,6 +14,16 @@ enum GeometryError: Error {
     case ZeroVector
 }
 
+struct Material {
+    let ambient: float4?
+    let diffuse: float4?
+    
+    static let empty = Material(
+        ambient: float4(),
+        diffuse: float4()
+    )
+}
+
 struct Vertex {
     let position: float3
     let normal: float3
@@ -23,6 +33,7 @@ struct Vertex {
 struct Mesh {
     let vertices: [Vertex]
     let indices: [Int]
+    let material: Material
     
     var center: float3 {
         get {
@@ -32,7 +43,8 @@ struct Mesh {
     
     static let empty = Mesh(
         vertices: [Vertex](),
-        indices: [Int]()
+        indices: [Int](),
+        material: Material.empty
     )
 }
 
