@@ -34,6 +34,7 @@ struct Vertex {
 }
 
 struct Mesh {
+    let indexCount: Int
     let vertices: [Vertex]
     let indices: [Int]
     let material: Material
@@ -56,6 +57,7 @@ struct Mesh {
     }
     
     static let empty = Mesh(
+        indexCount: 0,
         vertices: [Vertex](),
         indices: [Int](),
         material: Material.empty

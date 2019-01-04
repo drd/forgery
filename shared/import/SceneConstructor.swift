@@ -204,6 +204,7 @@ class SceneConstructor {
     private func resolveMeshMaterials() -> [Mesh] {
         return pendingMeshes.map { (meshId, pendingMesh) in
             Mesh(
+                indexCount: pendingMesh.mesh.indexCount,
                 vertices: pendingMesh.mesh.vertices,
                 indices: pendingMesh.mesh.indices,
                 material: materials[pendingMesh.materialId] ?? pendingMesh.mesh.material
@@ -246,6 +247,7 @@ class SceneConstructor {
         var vertices = [Vertex]()
         var indices = [UInt32]()
         var center = float3()
+        var indexOffset = 0
         
         let submeshes = meshes.enumerated().map { (i, mesh) -> Submesh in
             if (mesh.indices.count == 0) {
@@ -255,8 +257,6 @@ class SceneConstructor {
             let material = mesh.material
             
             center += mesh.center
-            
-            let indexOffset = indices.count
             
             let submesh = Submesh(
                 primitiveType: .triangle,
@@ -268,6 +268,8 @@ class SceneConstructor {
             
             vertices += mesh.materializedVertices(material)
             indices += mesh.indices.map { UInt32($0 + indexOffset) }
+            
+            indexOffset += mesh.indexCount
             
             return submesh
         }

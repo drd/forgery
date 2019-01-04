@@ -128,7 +128,7 @@ class Renderer: NSObject, MTKViewDelegate {
     
     func buildMesh(device: MTLDevice) throws {
         try SceneConstructor(
-            url: URL(fileURLWithPath: "/Users/eoconnell/workspace/bim/forge-investigation/scenes/cscc"),
+            url: URL(fileURLWithPath: "/Users/eoconnell/workspace/bim/forge-investigation/scenes/house"),
             device: device
         ).loadAsync { mesh in
             self.mesh = mesh

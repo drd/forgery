@@ -32,6 +32,8 @@ typedef struct
     float4 ambient;
     float4 diffuse;
     float4 specular;
+    float3 worldPosition;
+    float3 normal;
     float2 texCoord;
 } ColorInOut;
 
@@ -49,7 +51,8 @@ vertex ColorInOut vertexShader(constant Vertex * vertices [[ buffer(BufferIndexM
     out.texCoord = in.texCoord;
     out.ambient = in.ambient;
     out.diffuse = in.diffuse;
-
+    out.worldPosition = position.xyz;
+    out.normal = in.normal.xyz;
     return out;
 }
 
@@ -61,7 +64,11 @@ fragment float4 fragmentShader(ColorInOut in [[stage_in]],
                                    mag_filter::linear,
                                    min_filter::linear);
 
-    half4 colorSample   = colorMap.sample(colorSampler, in.texCoord.xy);
-
-    return in.ambient; // + in.diffuse + in.specular;
+//    half4 colorSample   = colorMap.sample(colorSampler, in.texCoord.xy);
+    float3 lighting =
+        abs(dot(
+            in.normal,
+            normalize(in.worldPosition - float3(30, 15, 19))));
+    
+    return in.ambient + float4(lighting, 1) * in.diffuse; // + in.diffuse + in.specular;
 }

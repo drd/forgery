@@ -43,12 +43,25 @@ class MeshParser {
         let coordData = data.advanced(by: MemoryLayout<Int32>.stride)
         let rawCoords = getFloat32s(data: coordData, count: coordCount)
         let coords = rawCoords.chunked(into: 3).map(float3.init)
+        
+        let dedupedCoords = coords.reduce(into: [float3: Int]()) { acc, el in
+            if acc[el] == nil {
+                acc[el] = acc.count
+            }
+        }
+        
+        let indexMapping = Dictionary(uniqueKeysWithValues: dedupedCoords.map {
+            ($1, $0)
+        })
         let triangleCountData = coordData.advanced(by: MemoryLayout<Float32>.stride * coordCount)
         let triangleCount = getInt32(data: triangleCountData)
 //        print("Triangles: \(triangleCount)")
         
         let triangleData = triangleCountData.advanced(by: MemoryLayout<Int32>.stride)
         let indices = getInt32s(data: triangleData, count: triangleCount)
+        let dedupedIndices = indices.map { i in
+            dedupedCoords[coords[i]]!
+        }
         
         let uvCountData = triangleData.advanced(by: triangleCount * MemoryLayout<Int32>.stride)
         let uvCount = getInt32(data: uvCountData)
@@ -58,25 +71,26 @@ class MeshParser {
             .chunked(into: 2)
             .map(float2.init)
 
-        let normals = makeNormals(coords, indices)
+        let normals = makeNormals(indexMapping, dedupedIndices)
         
-        let vertices = coords.enumerated().map { (i, coord) in
+        let vertices = dedupedCoords.map { tuple in
             Vertex(
-                position: coord,
-                normal: normals[i],
-                uv: uvs[i],
+                position: tuple.key,
+                normal: normals[tuple.value],
+                uv: uvs[dedupedIndices[tuple.value]],
                 material: Material.empty
             )
         }
         
         return Mesh(
+            indexCount: dedupedCoords.count,
             vertices: vertices,
-            indices: indices,
+            indices: dedupedIndices,
             material: Material.empty
         )
     }
     
-    func makeNormals(_ vertices: [float3], _ triangles: [Int]) -> [float3] {
+    func makeNormals(_ vertices: [Int: float3], _ triangles: [Int]) -> [float3] {
         var normals: [float3] = [float3](repeating: float3(), count: vertices.count)
         
         for triangle in triangles.chunked(into: 3) {
@@ -84,8 +98,8 @@ class MeshParser {
             let b = triangle[1]
             let c = triangle[2]
             
-            let ab = vertices[b] - vertices[a]
-            let ac = vertices[c] - vertices[a]
+            let ab = vertices[b]! - vertices[a]!
+            let ac = vertices[c]! - vertices[a]!
             
             let normal = ab.cross(ac).normalized
 
@@ -106,5 +120,13 @@ class MeshParser {
         let ac = c - a
 
         return ab.cross(ac).normalized
+    }
+}
+
+extension float3 : Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(x)
+        hasher.combine(y)
+        hasher.combine(z)
     }
 }
