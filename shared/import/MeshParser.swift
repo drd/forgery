@@ -50,6 +50,8 @@ class MeshParser {
             }
         }
         
+        print("Deduped \(coords.count) coords into \(dedupedCoords.count)")
+        
         let indexMapping = Dictionary(uniqueKeysWithValues: dedupedCoords.map {
             ($1, $0)
         })

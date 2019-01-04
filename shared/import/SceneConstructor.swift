@@ -250,12 +250,6 @@ class SceneConstructor {
         var indexOffset = 0
         
         let submeshes = meshes.enumerated().map { (i, mesh) -> Submesh in
-            if (mesh.indices.count == 0) {
-                print("Mesh \(i) \(mesh)")
-            }
-            
-            let material = mesh.material
-            
             center += mesh.center
             
             let submesh = Submesh(
@@ -266,10 +260,12 @@ class SceneConstructor {
                 indexOffset: indexOffset * MemoryLayout<UInt32>.stride
             )
             
-            vertices += mesh.materializedVertices(material)
+            vertices += mesh.materializedVertices()
             indices += mesh.indices.map { UInt32($0 + indexOffset) }
             
             indexOffset += mesh.indexCount
+            
+            print("At mesh \(i): \(vertices.count) verts \(indices.count) indices; offset: \(indexOffset)")
             
             return submesh
         }

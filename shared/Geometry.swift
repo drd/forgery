@@ -45,7 +45,7 @@ struct Mesh {
         }
     }
     
-    func materializedVertices(_ material: Material) -> [Vertex] {
+    func materializedVertices() -> [Vertex] {
         return vertices.map {
             Vertex(
                 position: $0.position,
