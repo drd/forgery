@@ -31,9 +31,17 @@ struct Vertex {
     let normal: float3
     let uv: float2
     let material: Material
+    
+    static let empty = Vertex(
+        position: float3(),
+        normal: float3(),
+        uv: float2(),
+        material: Material.empty
+    )
 }
 
 struct Mesh {
+    let name: String
     let indexCount: Int
     let vertices: [Vertex]
     let indices: [Int]
@@ -56,7 +64,12 @@ struct Mesh {
         }
     }
     
+    var indexedCoords: [float3] {
+        return indices.map { vertices[$0].position }
+    }
+    
     static let empty = Mesh(
+        name: "<empty>",
         indexCount: 0,
         vertices: [Vertex](),
         indices: [Int](),
@@ -66,6 +79,8 @@ struct Mesh {
 
 // Contains metadata and location describing geometry and indexing in CompositeMesh#buffer
 struct Submesh {
+    let name: String
+
     // Geometry type
     let primitiveType: MTLPrimitiveType
     // Vertex data location in shared vertex buffer

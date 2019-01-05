@@ -242,11 +242,13 @@ class Renderer: NSObject, MTKViewDelegate {
                 
                 for submesh in mesh.submeshes {
                     if (submesh.indexCount > 0) {
+                        renderEncoder.pushDebugGroup("Submesh \(submesh.name)")
                         renderEncoder.drawIndexedPrimitives(type: submesh.primitiveType,
                                                             indexCount: submesh.indexCount,
                                                             indexType: submesh.indexType,
                                                             indexBuffer: mesh.indexBuffer,
                                                             indexBufferOffset: submesh.indexOffset)
+                        renderEncoder.popDebugGroup()
                     }
                 }
                 

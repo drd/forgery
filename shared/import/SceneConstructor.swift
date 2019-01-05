@@ -68,7 +68,6 @@ class SceneConstructor {
     init(url: URL, device: MTLDevice) throws {
         self.baseDir = url
         self.device = device
-        print("Looking in \(url)")
         self.instanceTree = try decoder.decode(Node.self, from:
             Data.init(contentsOf: baseDir.appendingPathComponent("instancetree.json"))
         )
@@ -89,7 +88,7 @@ class SceneConstructor {
         switch (node.type) {
         case "Transform":
             // TODO: handle transform matrixes
-            print(node.mtype)
+            ()
         case "Mesh":
             for (fragmentId, materialId) in zip(node.fragments!, node.materials!.map(String.init)) {
                 self.loadMaterial(String(materialId))
@@ -114,7 +113,6 @@ class SceneConstructor {
                 if self.materials[materialId] != nil {
                     loaded = true
                 }
-                print("Hey saved some time there for \(materialId)")
 //            }
 
             if !loaded {
@@ -132,7 +130,6 @@ class SceneConstructor {
                             specular?.w = opacity
 //                            self.loadGroup.enter()
 //                            self.loadQueue.async(flags: .barrier) {
-                                print("Stored material: \(materialId)")
                                 self.materials[materialId] = Material(
                                     ambient: ambient ?? diffuse ?? float4(),
                                     diffuse: diffuse ?? float4(),
@@ -154,19 +151,27 @@ class SceneConstructor {
     private func loadMesh(_ sceneId: Int, _ nodeId: Int, _ fragmentId: Int, _ materialId: String) {
 //        loadGroup.enter()
 //        DispatchQueue.global(qos: .userInitiated).async {
+//        if (pendingMeshes.count > 10) { return }
             let meshId = "\(sceneId)-\(nodeId)-\(fragmentId)"
+//        if (meshId != "1-3950-66") {
+//            return
+//        }
             do {
                 if let meshUrl = self.meshFiles[meshId] {
                     let mesh = try MeshParser(url: meshUrl).parse()
 //                    self.loadGroup.enter()
 //                    self.loadQueue.async(flags: .barrier) {
-                        print("Storing mesh \(meshId)")
-                    self.pendingMeshes[meshId] = PendingMesh(
-                        mesh: mesh,
+//                        print("Storing mesh \(meshId)")
+                    let dedupedMesh = try MeshParser(url: meshUrl).parseDeduped()
+                    print("Mesh \(meshId): \(mesh.indexedCoords == dedupedMesh.indexedCoords)")
+//                    self.pendingMeshes[meshId] = PendingMesh(
+//                        mesh: mesh,
+//                        materialId: materialId
+//                    )
+                    self.pendingMeshes[meshId + "-d"] = PendingMesh(
+                        mesh: dedupedMesh,
                         materialId: materialId
                     )
-//                        self.loadGroup.leave()
-//                    }
                 }
             } catch {
                 print("Error loading mesh: \(meshId): \(error)")
@@ -180,30 +185,12 @@ class SceneConstructor {
         for node in nodes {
             loadNode(node)
         }
-        
-//        for (i, fileURL) in meshFiles.enumerated() {
-//            print("Enter: \(i) Loading: \(fileURL)")
-//            loadGroup.enter()
-//            DispatchQueue.global(qos: .userInitiated).async {
-//                do {
-//                    let mesh = try MeshParser(url: fileURL).parse()
-//                    self.queue.async(flags: .barrier) {
-//                        self.meshes[i] = mesh
-//                        print("Mesh \(i) index count: \(self.meshes[i].indices.count)")
-//                        loadGroup.leave()
-//                    }
-//                } catch {
-//                    print("Failed to load \(fileURL)")
-//                }
-//            }
-//        }
-        
-//        return loadGroup
     }
     
     private func resolveMeshMaterials() -> [Mesh] {
         return pendingMeshes.map { (meshId, pendingMesh) in
             Mesh(
+                name: meshId,
                 indexCount: pendingMesh.mesh.indexCount,
                 vertices: pendingMesh.mesh.vertices,
                 indices: pendingMesh.mesh.indices,
@@ -242,17 +229,18 @@ class SceneConstructor {
             return nil
         }
     }
-
+    
     private func constructCompositeMesh(_ meshes: [Mesh]) throws -> CompositeMesh {
         var vertices = [Vertex]()
         var indices = [UInt32]()
         var center = float3()
         var indexOffset = 0
         
-        let submeshes = meshes.enumerated().map { (i, mesh) -> Submesh in
+        func addMesh(_ i: Int, _ mesh: Mesh) -> Submesh {
             center += mesh.center
             
             let submesh = Submesh(
+                name: mesh.name,
                 primitiveType: .triangle,
                 vertexOffset: vertices.count * MemoryLayout<Vertex>.stride,
                 indexType: .uint32,
@@ -260,8 +248,8 @@ class SceneConstructor {
                 indexOffset: indexOffset * MemoryLayout<UInt32>.stride
             )
             
+            indices += mesh.indices.map { UInt32($0 + vertices.count) }
             vertices += mesh.materializedVertices()
-            indices += mesh.indices.map { UInt32($0 + indexOffset) }
             
             indexOffset += mesh.indexCount
             
@@ -270,6 +258,23 @@ class SceneConstructor {
             return submesh
         }
         
+//        let submeshes1 = meshes[0..<4].enumerated().map { (i, mesh) -> Submesh in
+//            return addMesh(i, mesh)
+//        }
+//
+//        let submeshes = submeshes1 + submeshes1.enumerated().map { (i, submesh) in
+//            let name = submesh.name
+//            let otherName = (name.hasSuffix("-d"))
+//                ? name.replacingOccurrences(of: "-d", with: "")
+//                : name + "-d"
+//
+//            return addMesh(i + submeshes1.count, meshes.first { $0.name == otherName }!)
+//        }
+        
+        let submeshes = meshes.enumerated().map { (i, mesh) -> Submesh in
+            return addMesh(i, mesh)
+        }
+
         let vertexBuffer = device.makeBuffer(
             bytes: vertices,
             length: vertices.count * MemoryLayout<Vertex>.stride,
