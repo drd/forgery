@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import os
 
 fileprivate var timestamp: DateFormatter = {
     let formatter = DateFormatter()
@@ -23,7 +24,7 @@ func logger(_ message: String, file: String = #file, function: String = #functio
     #if DEBUG
     print("\(now()) [\(fileName) \(function):\(line)] \(message)")
     #else
-    os_logger("%{public}@", "\(timestamp) \(message)")
+    os_log("%{public}@", "\(now()) \(message)")
     #endif
 }
 

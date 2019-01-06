@@ -127,10 +127,12 @@ class Renderer: NSObject, MTKViewDelegate {
     }
     
     func buildMesh(device: MTLDevice) throws {
+        logger("Starting scene!")
         try SceneConstructor(
             url: URL(fileURLWithPath: "/Users/eoconnell/workspace/bim/forge-investigation/scenes/cscc"),
             device: device
         ).loadAsync { mesh in
+            logger("Finished scene!")
             self.mesh = mesh
             logger("Center: \(self.mesh.center)")
         }
