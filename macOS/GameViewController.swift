@@ -13,15 +13,12 @@ import MetalKit
 class GameViewController: NSViewController {
 
     var renderer: Renderer!
-    var mtkView: MTKView!
+    var mtkView: MTKView {
+        return self.view as! MTKView
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        guard let mtkView = self.view as? MTKView else {
-            logger("View attached to GameViewController is not an MTKView")
-            return
-        }
 
         // Select the device to render with.  We choose the default device
         guard let defaultDevice = MTLCreateSystemDefaultDevice() else {
@@ -42,6 +39,23 @@ class GameViewController: NSViewController {
         renderer.mtkView(mtkView, drawableSizeWillChange: mtkView.drawableSize)
 
         mtkView.delegate = renderer
+        loadScene()
+    }
+    
+    private func loadScene() {
+        do {
+            logger("Starting scene!")
+            try SceneConstructor(
+                url: URL(fileURLWithPath: "/Users/eoconnell/workspace/bim/forge-investigation/scenes/cscc"),
+                device: mtkView.device!
+            ).loadAsync { mesh in
+                logger("Finished scene!")
+                self.renderer.mesh = mesh
+                logger("Center: \(mesh!.center)")
+            }
+        } catch {
+            logger("Error loading scene! \(error)")
+        }
     }
     
     override func scrollWheel(with event: NSEvent) {

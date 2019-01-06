@@ -87,13 +87,6 @@ class Renderer: NSObject, MTKViewDelegate {
         }
         
         super.init()
-
-        do {
-            try buildMesh(device: device)
-        } catch {
-            logger("Unable to load mesh. Error info: \(error)")
-            return nil
-        }
     }
     
     class func buildRenderPipelineWithDevice(device: MTLDevice,
@@ -124,18 +117,6 @@ class Renderer: NSObject, MTKViewDelegate {
         pipelineDescriptor.stencilAttachmentPixelFormat = metalKitView.depthStencilPixelFormat
         
         return try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
-    }
-    
-    func buildMesh(device: MTLDevice) throws {
-        logger("Starting scene!")
-        try SceneConstructor(
-            url: URL(fileURLWithPath: "/Users/eoconnell/workspace/bim/forge-investigation/scenes/cscc"),
-            device: device
-        ).loadAsync { mesh in
-            logger("Finished scene!")
-            self.mesh = mesh
-            logger("Center: \(self.mesh.center)")
-        }
     }
     
     class func loadTexture(device: MTLDevice,
