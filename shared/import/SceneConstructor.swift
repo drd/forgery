@@ -82,8 +82,6 @@ class SceneConstructor {
         workManager.add(id: "1") {
             self.loadMaterials()
             self.loadMeshes()
-//            logger("Loading instance tree, yey \(DispatchQueue.currentLabel))")
-//            self.load(nodes: self.instanceTree.childs!)
         }
     }
     
@@ -129,7 +127,7 @@ class SceneConstructor {
         
         logger("Found \(meshes.count) meshes")
         
-        for (i, chunk) in meshes.chunked(into: 100).enumerated() {
+        for (i, chunk) in meshes.chunked(into: 20).enumerated() {
             workManager.add(id: "chunk-\(i)") {
                 for meshInfo in chunk {
                     self.loadMesh(meshInfo)
@@ -165,10 +163,7 @@ class SceneConstructor {
         do {
             if let meshUrl = self.meshFiles[info.id] {
                 let mesh = try MeshParser(url: meshUrl).parse(with: info.material)
-                
-                logger("Trying to store mesh \(info.id)") //" \(DispatchQueue.currentLabel)")
                 controlQueue.async(flags: .barrier) {
-                    logger("Storing mesh: \(info.id)") // \(DispatchQueue.currentLabel)")
                     self.meshes[info.id] = mesh
                 }
             }

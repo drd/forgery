@@ -36,11 +36,9 @@ class MeshParser {
     }
 
     func parse(with material: Material) -> Mesh {
-        // Number of coordinates is the first Int32 in the data
         let coordCount = getInt32(data: data)
-        //        logger("Coords: \(coordCount)")
-        
         let coordData = data.advanced(by: MemoryLayout<Int32>.stride)
+
         let rawCoords = getFloat32s(data: coordData, count: coordCount)
         let coords = rawCoords.chunked(into: 3).map(float3.init)
         
@@ -50,14 +48,11 @@ class MeshParser {
             }
         }
         
-        logger("Deduped \(coords.count) coords into \(dedupedCoords.count)")
-        
         let indexMapping = Dictionary(uniqueKeysWithValues: dedupedCoords.map {
             ($1, $0)
         })
         let triangleCountData = coordData.advanced(by: MemoryLayout<Float32>.stride * coordCount)
         let triangleCount = getInt32(data: triangleCountData)
-        //        logger("Triangles: \(triangleCount)")
         
         let triangleData = triangleCountData.advanced(by: MemoryLayout<Int32>.stride)
         let indices = getInt32s(data: triangleData, count: triangleCount)

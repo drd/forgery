@@ -33,9 +33,8 @@ class WorkManager {
         let job = Job(id: id, status: .added, work: work)
         
         dispatchGroup.enter()
-        logger("About to add \(id) on \(DispatchQueue.currentLabel)")
         dataQueue.async(flags: .barrier) {
-            logger("Adding \(id) on \(DispatchQueue.currentLabel)")
+            logger("Adding \(id)")
             self.jobs[job.id] = job
             self.start(job)
         }
@@ -70,9 +69,8 @@ class WorkManager {
     }
     
     private func set(_ job: Job, status: Status) {
-        logger("About to set \(DispatchQueue.currentLabel)")
         self.dataQueue.async(flags: .barrier) {
-            logger("Setting job \(job.id) to \(status) on \(DispatchQueue.currentLabel)")
+            logger("Setting job \(job.id) to \(status)")
             self.jobs[job.id]!.status = status
         }
     }
