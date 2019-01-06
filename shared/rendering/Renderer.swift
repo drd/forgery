@@ -69,7 +69,7 @@ class Renderer: NSObject, MTKViewDelegate {
             pipelineState = try Renderer.buildRenderPipelineWithDevice(device: device,
                                                                        metalKitView: metalKitView)
         } catch {
-            print("Unable to compile render pipeline state.  Error info: \(error)")
+            logger("Unable to compile render pipeline state.  Error info: \(error)")
             return nil
         }
         
@@ -82,7 +82,7 @@ class Renderer: NSObject, MTKViewDelegate {
         do {
             colorMap = try Renderer.loadTexture(device: device, textureName: "ColorMap")
         } catch {
-            print("Unable to load texture. Error info: \(error)")
+            logger("Unable to load texture. Error info: \(error)")
             return nil
         }
         
@@ -91,7 +91,7 @@ class Renderer: NSObject, MTKViewDelegate {
         do {
             try buildMesh(device: device)
         } catch {
-            print("Unable to load mesh. Error info: \(error)")
+            logger("Unable to load mesh. Error info: \(error)")
             return nil
         }
     }
@@ -128,11 +128,11 @@ class Renderer: NSObject, MTKViewDelegate {
     
     func buildMesh(device: MTLDevice) throws {
         try SceneConstructor(
-            url: URL(fileURLWithPath: "/Users/eoconnell/workspace/bim/forge-investigation/scenes/house"),
+            url: URL(fileURLWithPath: "/Users/eoconnell/workspace/bim/forge-investigation/scenes/cscc"),
             device: device
         ).loadAsync { mesh in
             self.mesh = mesh
-            print("Center: \(self.mesh.center)")
+            logger("Center: \(self.mesh.center)")
         }
     }
     

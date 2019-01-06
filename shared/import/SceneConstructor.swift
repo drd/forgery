@@ -11,6 +11,10 @@ import Metal
 import simd
 
 class SceneConstructor {
+    struct LoadError : Error {
+        let message: String
+    }
+    
     struct PendingMesh {
         let mesh: Mesh
         let materialId: String
@@ -35,14 +39,15 @@ class SceneConstructor {
 
     let device: MTLDevice
 
-    let loadQueue = DispatchQueue(label: "LoadQueue", attributes: .concurrent)
-    let loadGroup = DispatchGroup()
-
+    let controlQueue = DispatchQueue(label: "LoadQueue", attributes: .concurrent)
+    
     let decoder = JSONDecoder()
-    var pendingMeshes = [String: PendingMesh]()
+    var meshes = [String: Mesh]()
     var materials = [String: Material]()
     
     var instanceTree: Node!
+    
+    let workManager = WorkManager()
 
     lazy var meshFiles: [String: URL] = directoryAsDict(dir: self.meshDir)
     lazy var materialFiles: [String: URL] = directoryAsDict(dir: self.materialDir)
@@ -60,7 +65,7 @@ class SceneConstructor {
                 }
             )
         } catch {
-            print("Error loading \(dir): \(error)")
+            logger("Error loading \(dir): \(error)")
             return [:]
         }
     }
@@ -73,142 +78,113 @@ class SceneConstructor {
         )
     }
     
-    private func serialLoad() -> [Mesh] {
-        do {
-            return try meshFiles.map { (key, url) in
-                try MeshParser(url: url).parse()
-            }
-        } catch {
-            print("Failure! \(error)")
-            return [Mesh]()
+    private func kickoffWorkQueue() {
+        workManager.add(id: "1") {
+            self.loadMaterials()
+            self.loadMeshes()
+//            logger("Loading instance tree, yey \(DispatchQueue.currentLabel))")
+//            self.load(nodes: self.instanceTree.childs!)
         }
     }
     
-    private func loadNode(_ node: Node) {
-        switch (node.type) {
-        case "Transform":
-            // TODO: handle transform matrixes
-            ()
-        case "Mesh":
-            for (fragmentId, materialId) in zip(node.fragments!, node.materials!.map(String.init)) {
-                self.loadMaterial(String(materialId))
-                // TODO: don't hardcode scene id
-                self.loadMesh(1, node.id, fragmentId, materialId)
+    private func loadMaterials() {
+        for (id, url) in self.materialFiles {
+            do {
+                self.materials[id] = try self.loadMaterial(from: url)
+            } catch {
+                logger("Error loading material \(id): \(error)")
             }
-        default:
-            print("Unknown Node type: \(node.type)")
-        }
-        
-        if let children = node.childs {
-            self.load(nodes: children)
         }
     }
     
-    private func loadMaterial(_ materialId: String) {
-//        loadGroup.enter()
-//        DispatchQueue.global(qos: .userInitiated).async {
-            var loaded = false
-            
-//            self.loadQueue.sync {
-                if self.materials[materialId] != nil {
-                    loaded = true
-                }
-//            }
+    struct MeshInfo {
+        let id: String
+        let material: Material
+    }
+    
+    private func loadMeshes() {
+        logger("I'm looking for meshes")
 
-            if !loaded {
-                do {
-                    if let materialUrl = self.materialFiles[materialId] {
-                        let svfMaterial = try self.decoder.decode(SVFMaterial.self, from: Data(contentsOf: materialUrl))
-                        if let defn = svfMaterial.materials.first {
-                            var ambient = defn.value.properties.colors.generic_ambient?.float4
-                            var diffuse = defn.value.properties.colors.generic_diffuse?.float4
-                            var specular = defn.value.properties.colors.generic_specular?.float4
-                            let opacity: Float = 1.0 - (defn.value.properties.scalars.generic_transparency?.values.first ?? 0.0)
-                            
-                            ambient?.w = opacity
-                            diffuse?.w = opacity
-                            specular?.w = opacity
-//                            self.loadGroup.enter()
-//                            self.loadQueue.async(flags: .barrier) {
-                                self.materials[materialId] = Material(
-                                    ambient: ambient ?? diffuse ?? float4(),
-                                    diffuse: diffuse ?? float4(),
-                                    specular: specular ?? float4()
-                            )
-//                                self.loadGroup.leave()
-//                            }
+        var meshes = [MeshInfo]()
+
+        func iterateChildren(node: Node) {
+            if let children = node.childs {
+                for child in children {
+                    if (child.type == "Mesh") {
+                        for (i, (fragmentId, materialId)) in zip(child.fragments!, child.materials!.map(String.init)).enumerated() {
+                            if (child.fragPolys![i] > 0) {
+                                // TODO: don't hardcode scene id
+                                let meshId = "\(1)-\(child.id)-\(fragmentId)"
+                                meshes.append(MeshInfo(id: meshId, material: self.materials[materialId]!))
+                            }
                         }
                     }
-                } catch {
-                    print("Error loading material \(materialId): \(error)")
+                    
+                    iterateChildren(node: child)
                 }
-//            }
-//
-//            self.loadGroup.leave()
-        }
-    }
-    
-    private func loadMesh(_ sceneId: Int, _ nodeId: Int, _ fragmentId: Int, _ materialId: String) {
-//        loadGroup.enter()
-//        DispatchQueue.global(qos: .userInitiated).async {
-//        if (pendingMeshes.count > 10) { return }
-            let meshId = "\(sceneId)-\(nodeId)-\(fragmentId)"
-//        if (meshId != "1-3950-66") {
-//            return
-//        }
-            do {
-                if let meshUrl = self.meshFiles[meshId] {
-                    let mesh = try MeshParser(url: meshUrl).parse()
-//                    self.loadGroup.enter()
-//                    self.loadQueue.async(flags: .barrier) {
-//                        print("Storing mesh \(meshId)")
-                    let dedupedMesh = try MeshParser(url: meshUrl).parseDeduped()
-                    print("Mesh \(meshId): \(mesh.indexedCoords == dedupedMesh.indexedCoords)")
-//                    self.pendingMeshes[meshId] = PendingMesh(
-//                        mesh: mesh,
-//                        materialId: materialId
-//                    )
-                    self.pendingMeshes[meshId + "-d"] = PendingMesh(
-                        mesh: dedupedMesh,
-                        materialId: materialId
-                    )
-                }
-            } catch {
-                print("Error loading mesh: \(meshId): \(error)")
             }
-
-//            self.loadGroup.leave()
-//        }
-    }
-    
-    private func load(nodes: [Node]) {
-        for node in nodes {
-            loadNode(node)
-        }
-    }
-    
-    private func resolveMeshMaterials() -> [Mesh] {
-        return pendingMeshes.map { (meshId, pendingMesh) in
-            Mesh(
-                name: meshId,
-                indexCount: pendingMesh.mesh.indexCount,
-                vertices: pendingMesh.mesh.vertices,
-                indices: pendingMesh.mesh.indices,
-                material: materials[pendingMesh.materialId] ?? pendingMesh.mesh.material
-            )
-        }
-    }
-    
-    func loadAsync(completion: @escaping (CompositeMesh?) -> Void) {
-        if let children = instanceTree.childs {
-            load(nodes: children)
         }
         
-        loadGroup.notify(
+        iterateChildren(node: self.instanceTree)
+        
+        logger("Found \(meshes.count) meshes")
+        
+        for (i, chunk) in meshes.chunked(into: 100).enumerated() {
+            workManager.add(id: "chunk-\(i)") {
+                for meshInfo in chunk {
+                    self.loadMesh(meshInfo)
+                }
+            }
+        }
+    }
+
+    private func loadMaterial(from url: URL) throws -> Material {
+        let svfMaterial = try self.decoder.decode(SVFMaterial.self, from: Data(contentsOf: url))
+
+        if let defn = svfMaterial.materials.first {
+            var ambient = defn.value.properties.colors.generic_ambient?.float4
+            var diffuse = defn.value.properties.colors.generic_diffuse?.float4
+            var specular = defn.value.properties.colors.generic_specular?.float4
+            let opacity: Float = 1.0 - (defn.value.properties.scalars.generic_transparency?.values.first ?? 0.0)
+            
+            ambient?.w = opacity
+            diffuse?.w = opacity
+            specular?.w = opacity
+            
+            return Material(
+                ambient: ambient ?? diffuse ?? float4(),
+                diffuse: diffuse ?? float4(),
+                specular: specular ?? float4()
+            )
+        }
+        
+        throw LoadError(message: "Couldn't load material at \(url)")
+    }
+    
+    private func loadMesh(_ info: MeshInfo) {
+        do {
+            if let meshUrl = self.meshFiles[info.id] {
+                let mesh = try MeshParser(url: meshUrl).parse(with: info.material)
+                
+                logger("Trying to store mesh \(info.id)") //" \(DispatchQueue.currentLabel)")
+                controlQueue.async(flags: .barrier) {
+                    logger("Storing mesh: \(info.id)") // \(DispatchQueue.currentLabel)")
+                    self.meshes[info.id] = mesh
+                }
+            }
+        } catch {
+            logger("Error loading mesh: \(info.id): \(error)")
+        }
+    }
+
+    func loadAsync(completion: @escaping (CompositeMesh?) -> Void) {
+        kickoffWorkQueue()
+        
+        workManager.notify(
             queue: DispatchQueue.global(),
             work: DispatchWorkItem(block: {
                 do {
-                    completion(try self.constructCompositeMesh(self.resolveMeshMaterials()))
+                    completion(try self.constructCompositeMesh())
                 } catch {
                     completion(nil)
                 }
@@ -218,25 +194,22 @@ class SceneConstructor {
 
     func loadBlocking() -> CompositeMesh? {
         do {
-            if let children = instanceTree.childs {
-                load(nodes: children)
-            }
-
-            loadGroup.wait()
-            return try constructCompositeMesh(self.resolveMeshMaterials())
+            kickoffWorkQueue()
+            workManager.wait()
+            return try constructCompositeMesh()
         } catch {
-            print("Failure! \(error)")
+            logger("Failure! \(error)")
             return nil
         }
     }
     
-    private func constructCompositeMesh(_ meshes: [Mesh]) throws -> CompositeMesh {
+    private func constructCompositeMesh() throws -> CompositeMesh {
         var vertices = [Vertex]()
         var indices = [UInt32]()
         var center = float3()
         var indexOffset = 0
         
-        func addMesh(_ i: Int, _ mesh: Mesh) -> Submesh {
+        let submeshes = meshes.map { (i, mesh) -> Submesh in
             center += mesh.center
             
             let submesh = Submesh(
@@ -253,26 +226,9 @@ class SceneConstructor {
             
             indexOffset += mesh.indexCount
             
-            print("At mesh \(i): \(vertices.count) verts \(indices.count) indices; offset: \(indexOffset)")
+            logger("At mesh \(i): \(vertices.count) verts \(indices.count) indices; offset: \(indexOffset)")
             
             return submesh
-        }
-        
-//        let submeshes1 = meshes[0..<4].enumerated().map { (i, mesh) -> Submesh in
-//            return addMesh(i, mesh)
-//        }
-//
-//        let submeshes = submeshes1 + submeshes1.enumerated().map { (i, submesh) in
-//            let name = submesh.name
-//            let otherName = (name.hasSuffix("-d"))
-//                ? name.replacingOccurrences(of: "-d", with: "")
-//                : name + "-d"
-//
-//            return addMesh(i + submeshes1.count, meshes.first { $0.name == otherName }!)
-//        }
-        
-        let submeshes = meshes.enumerated().map { (i, mesh) -> Submesh in
-            return addMesh(i, mesh)
         }
 
         let vertexBuffer = device.makeBuffer(
@@ -295,4 +251,10 @@ class SceneConstructor {
         )
     }
     
+}
+
+extension DispatchQueue {
+    class var currentLabel: String {
+        return String(validatingUTF8: __dispatch_queue_get_label(nil)) ?? "unknown"
+    }
 }

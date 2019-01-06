@@ -35,51 +35,10 @@ class MeshParser {
         return Array(data.copyBytes(as: type(of: Int32()))[..<count]).map { Int($0) }
     }
 
-    func parse() -> Mesh {
+    func parse(with material: Material) -> Mesh {
         // Number of coordinates is the first Int32 in the data
         let coordCount = getInt32(data: data)
-        
-        let coordData = data.advanced(by: MemoryLayout<Int32>.stride)
-        let rawCoords = getFloat32s(data: coordData, count: coordCount)
-        let coords = rawCoords.chunked(into: 3).map(float3.init)
-        
-        let triangleCountData = coordData.advanced(by: MemoryLayout<Float32>.stride * coordCount)
-        let triangleCount = getInt32(data: triangleCountData)
-        
-        let triangleData = triangleCountData.advanced(by: MemoryLayout<Int32>.stride)
-        let indices = getInt32s(data: triangleData, count: triangleCount)
-        
-        let uvCountData = triangleData.advanced(by: triangleCount * MemoryLayout<Int32>.stride)
-        let uvCount = getInt32(data: uvCountData)
-        let uvData = uvCountData.advanced(by: MemoryLayout<Int32>.stride)
-        let uvs = getFloat32s(data: uvData, count: uvCount)
-            .chunked(into: 2)
-            .map(float2.init)
-
-        let normals = makeNormals(Dictionary(uniqueKeysWithValues: Array(coords.enumerated())), indices)
-        
-        let vertices = coords.enumerated().map { (i, coord) in
-            Vertex(
-                position: coord,
-                normal: normals[i],
-                uv: uvs[i],
-                material: Material.empty
-            )
-        }
-        
-        return Mesh(
-            name: name,
-            indexCount: coords.count,
-            vertices: vertices,
-            indices: indices,
-            material: Material.empty
-        )
-    }
-    
-    func parseDeduped() -> Mesh {
-        // Number of coordinates is the first Int32 in the data
-        let coordCount = getInt32(data: data)
-        //        print("Coords: \(coordCount)")
+        //        logger("Coords: \(coordCount)")
         
         let coordData = data.advanced(by: MemoryLayout<Int32>.stride)
         let rawCoords = getFloat32s(data: coordData, count: coordCount)
@@ -91,14 +50,14 @@ class MeshParser {
             }
         }
         
-        print("Deduped \(coords.count) coords into \(dedupedCoords.count)")
+        logger("Deduped \(coords.count) coords into \(dedupedCoords.count)")
         
         let indexMapping = Dictionary(uniqueKeysWithValues: dedupedCoords.map {
             ($1, $0)
         })
         let triangleCountData = coordData.advanced(by: MemoryLayout<Float32>.stride * coordCount)
         let triangleCount = getInt32(data: triangleCountData)
-        //        print("Triangles: \(triangleCount)")
+        //        logger("Triangles: \(triangleCount)")
         
         let triangleData = triangleCountData.advanced(by: MemoryLayout<Int32>.stride)
         let indices = getInt32s(data: triangleData, count: triangleCount)
@@ -108,7 +67,7 @@ class MeshParser {
         
         let uvCountData = triangleData.advanced(by: triangleCount * MemoryLayout<Int32>.stride)
         let uvCount = getInt32(data: uvCountData)
-        //        print("UVs: \(uvCount)")
+        //        logger("UVs: \(uvCount)")
         let uvData = uvCountData.advanced(by: MemoryLayout<Int32>.stride)
         let uvs = getFloat32s(data: uvData, count: uvCount)
             .chunked(into: 2)
@@ -121,7 +80,7 @@ class MeshParser {
                 position: tuple.key,
                 normal: normals[tuple.value],
                 uv: uvs[dedupedIndices[tuple.value]],
-                material: Material.empty
+                material: material
             )
         }
         
@@ -130,7 +89,7 @@ class MeshParser {
             indexCount: dedupedIndices.count,
             vertices: vertices,
             indices: dedupedIndices,
-            material: Material.empty
+            material: material
         )
     }
     func makeNormals(_ vertices: [Int: float3], _ triangles: [Int]) -> [float3] {
