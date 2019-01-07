@@ -172,7 +172,7 @@ class SceneConstructor {
         }
     }
 
-    func loadAsync(completion: @escaping (CompositeMesh?) -> Void) {
+    func load(completion: @escaping (CompositeMesh?) -> Void) {
         kickoffWorkQueue()
         
         workManager.notify(
@@ -185,17 +185,6 @@ class SceneConstructor {
                 }
             })
         )
-    }
-
-    func loadBlocking() -> CompositeMesh? {
-        do {
-            kickoffWorkQueue()
-            workManager.wait()
-            return try constructCompositeMesh()
-        } catch {
-            logger("Failure! \(error)")
-            return nil
-        }
     }
     
     private func constructCompositeMesh() throws -> CompositeMesh {

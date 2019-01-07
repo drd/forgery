@@ -43,7 +43,25 @@ class Renderer: NSObject, MTKViewDelegate {
     var panning: float3 = float3()
     var rotation: float3 = float3()
 
-    var mesh: CompositeMesh!
+    var mesh: CompositeMesh! {
+        didSet {
+            panning = -mesh.center
+        }
+    }
+
+    var axis = float4x4.makeRotate(
+        float4x4.degrees(toRad: -90), 1, 0, 0
+    )
+    
+    var rotationMatrix: float4x4 {
+        return float4x4.init(diagonal: float4(1, 1, 1, 1))
+            * axis
+            .rotateAround(
+                x: rotation.x,
+                y: rotation.y,
+                z: rotation.z
+        )
+    }
     
     init?(metalKitView: MTKView) {
         self.device = metalKitView.device!
@@ -62,8 +80,6 @@ class Renderer: NSObject, MTKViewDelegate {
         metalKitView.depthStencilPixelFormat = MTLPixelFormat.depth32Float_stencil8
         metalKitView.colorPixelFormat = MTLPixelFormat.bgra8Unorm_srgb
         metalKitView.sampleCount = 1
-        
-//        let mtlVertexDescriptor = Renderer.buildMetalVertexDescriptor()
         
         do {
             pipelineState = try Renderer.buildRenderPipelineWithDevice(device: device,
@@ -148,34 +164,22 @@ class Renderer: NSObject, MTKViewDelegate {
     }
     
     func scrolled(delta: float3) {
-        panning += delta / 1000
+        panning += (float4(delta / 500, 1.0) * rotationMatrix).xyz
     }
 
     func rotated(delta: float3) {
-        rotation += delta / 1000
+        rotation += delta / 5000
     }
     
 
     private func updateGameState() {
         /// Update any game state before rendering
-        
         uniforms[0].projectionMatrix = projectionMatrix
         
-        let axis = float4x4.makeRotate(
-            float4x4.degrees(toRad: -90), 1, 0, 0
-        )
-        
         uniforms[0].modelViewMatrix =
-            float4x4.init(diagonal: float4(1, 1, 1, 1))
-            .rotateAround(
-                    x: rotation.x,
-                    y: rotation.y,
-                    z: rotation.z
-            )
-            * float4x4.makeTranslation(panning.x, panning.y, panning.z)
-            * axis
+            rotationMatrix
             * float4x4.makeScale(0.01, 0.01, 0.01)
-            * matrix4x4_translation(-14.3, 7.6, -6.7)
+            * float4x4.makeTranslation(panning.x, panning.y, panning.z)
     }
     
     func draw(in view: MTKView) {

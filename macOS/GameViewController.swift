@@ -46,9 +46,9 @@ class GameViewController: NSViewController {
         do {
             logger("Starting scene!")
             try SceneConstructor(
-                url: URL(fileURLWithPath: "/Users/eoconnell/workspace/bim/forge-investigation/scenes/cscc"),
+                url: URL(fileURLWithPath: "/Users/eoconnell/workspace/bim/forge-investigation/scenes/house"),
                 device: mtkView.device!
-            ).loadAsync { mesh in
+            ).load { mesh in
                 logger("Finished scene!")
                 self.renderer.mesh = mesh
                 logger("Center: \(mesh!.center)")
@@ -63,19 +63,11 @@ class GameViewController: NSViewController {
             renderer?.scrolled(
                 delta: float3(
                     Float(event.scrollingDeltaX),
-                    Float(event.scrollingDeltaY),
-                    0
+                    0,
+                    -Float(event.scrollingDeltaY)
                 )
             )
         } else if (event.modifierFlags.contains(.option) && event.modifierFlags.contains(.shift)) {
-            renderer?.rotated(
-                delta: float3(
-                    0,
-                    -Float(event.scrollingDeltaY),
-                    -Float(event.scrollingDeltaX)
-                )
-            )
-        } else if (event.modifierFlags.contains(.option)) {
             renderer?.rotated(
                 delta: float3(
                     -Float(event.scrollingDeltaY),
@@ -83,12 +75,20 @@ class GameViewController: NSViewController {
                     0
                 )
             )
+        } else if (event.modifierFlags.contains(.option)) {
+            renderer?.rotated(
+                delta: float3(
+                    -Float(event.scrollingDeltaY),
+                    0,
+                    Float(event.scrollingDeltaX)
+                )
+            )
         } else if (event.modifierFlags.contains(.shift)) {
             renderer?.scrolled(
                 delta: float3(
                     Float(event.scrollingDeltaX),
-                    0,
-                    Float(event.scrollingDeltaY)
+                    Float(event.scrollingDeltaY),
+                    0
                 )
             )
         }
